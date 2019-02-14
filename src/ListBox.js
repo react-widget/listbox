@@ -24,6 +24,8 @@ export default class ListBox extends React.Component {
     static propTypes = {
         className: PropTypes.string,
         style: PropTypes.object,
+        headerStyle: PropTypes.object,
+        footerStyle: PropTypes.object,
         scrollViewBodyStyle: PropTypes.object,
         prefixCls: PropTypes.string,
         valueField: PropTypes.string,
@@ -453,6 +455,8 @@ export default class ListBox extends React.Component {
             footerWrapperComponent: FooterWrapperComponent,
             renderHeader,
             renderFooter,
+            headerStyle = {},
+            footerStyle = {},
         } = this.props;
 
         if (width) {
@@ -485,6 +489,7 @@ export default class ListBox extends React.Component {
                     renderHeader ?
                         <HeaderWrapperComponent
                             className={`${prefixCls}-header`}
+                            style={headerStyle}
                         >
                             {renderHeader()}
                         </HeaderWrapperComponent> :
@@ -501,6 +506,7 @@ export default class ListBox extends React.Component {
                     renderFooter ?
                         <FooterWrapperComponent
                             className={`${prefixCls}-footer`}
+                            style={footerStyle}
                         >
                             {renderFooter()}
                         </FooterWrapperComponent> :

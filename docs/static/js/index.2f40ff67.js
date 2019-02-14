@@ -384,6 +384,18 @@ function (_Component) {
           height: 400
         },
         autoFocus: true,
+        renderHeader: function renderHeader() {
+          return _react.default.createElement("h3", null, "header");
+        },
+        renderFooter: function renderFooter() {
+          return _react.default.createElement("h3", null, "footer");
+        },
+        headerStyle: {
+          borderBottom: '1px solid #ccc'
+        },
+        footerStyle: {
+          borderTop: '1px solid #ccc'
+        },
         value: this.state.value,
         onChange: this.handleChange,
         items: dataset.filter(function (item, i) {
@@ -973,7 +985,11 @@ function (_React$Component) {
           BodyWrapperComponent = _this$props7.bodyWrapperComponent,
           FooterWrapperComponent = _this$props7.footerWrapperComponent,
           renderHeader = _this$props7.renderHeader,
-          renderFooter = _this$props7.renderFooter;
+          renderFooter = _this$props7.renderFooter,
+          _this$props7$headerSt = _this$props7.headerStyle,
+          headerStyle = _this$props7$headerSt === void 0 ? {} : _this$props7$headerSt,
+          _this$props7$footerSt = _this$props7.footerStyle,
+          footerStyle = _this$props7$footerSt === void 0 ? {} : _this$props7$footerSt;
 
       if (width) {
         style.width = width;
@@ -995,12 +1011,14 @@ function (_React$Component) {
         onFocus: onFocus,
         onBlur: onBlur
       }, renderHeader ? _react.default.createElement(HeaderWrapperComponent, {
-        className: "".concat(prefixCls, "-header")
+        className: "".concat(prefixCls, "-header"),
+        style: headerStyle
       }, renderHeader()) : null, _react.default.createElement(BodyWrapperComponent, {
         className: "".concat(prefixCls, "-body"),
         style: scrollViewBodyStyle
       }, this.getListItems()), renderFooter ? _react.default.createElement(FooterWrapperComponent, {
-        className: "".concat(prefixCls, "-footer")
+        className: "".concat(prefixCls, "-footer"),
+        style: footerStyle
       }, renderFooter()) : null);
     }
   }]);
@@ -1011,6 +1029,8 @@ exports.default = ListBox;
 (0, _defineProperty2.default)(ListBox, "propTypes", {
   className: _propTypes.default.string,
   style: _propTypes.default.object,
+  headerStyle: _propTypes.default.object,
+  footerStyle: _propTypes.default.object,
   scrollViewBodyStyle: _propTypes.default.object,
   prefixCls: _propTypes.default.string,
   valueField: _propTypes.default.string,
@@ -1782,4 +1802,4 @@ module.exports = __webpack_require__(/*! D:\wamp\www\github-projects\react-widge
 /***/ })
 
 /******/ });
-//# sourceMappingURL=index.1a730766.js.map
+//# sourceMappingURL=index.2f40ff67.js.map

@@ -59,6 +59,14 @@ export default class DEMO extends Component {
                         height: 400,
                     }}
                     autoFocus
+                    renderHeader={() => <h3>header</h3>}
+                    renderFooter={() => <h3>footer</h3>}
+                    headerStyle={{
+                        borderBottom: '1px solid #ccc'
+                    }}
+                    footerStyle={{
+                        borderTop: '1px solid #ccc'
+                    }}
                     value={this.state.value}
                     onChange={this.handleChange}
                     items={dataset.filter((item, i) => item.label.indexOf(this.filterMsg) >= 0)}
