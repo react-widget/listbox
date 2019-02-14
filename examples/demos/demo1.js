@@ -56,6 +56,7 @@ export default class DEMO extends Component {
                     style={{
                         maxWidth: 300,
                         maxHeight: 400,
+                        height: 400,
                     }}
                     autoFocus
                     value={this.state.value}
@@ -66,13 +67,13 @@ export default class DEMO extends Component {
 
                 <ListBox
                     multiple
-                    disabled
+                    disabled={false}
                     labelInValue
                     onChange={this.handleChange2}
                     defaultValue="V03"
                     style={{
                         maxWidth: 300,
-                        maxHeight: 400,
+                        height: 400,
                     }}
                 >
                     <ListItemGroup label="V">

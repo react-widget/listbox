@@ -380,7 +380,8 @@ function (_Component) {
       return _react.default.createElement("div", null, _react.default.createElement(_src.default, {
         style: {
           maxWidth: 300,
-          maxHeight: 400
+          maxHeight: 400,
+          height: 400
         },
         autoFocus: true,
         value: this.state.value,
@@ -391,13 +392,13 @@ function (_Component) {
         emptyLabel: "\u65E0\u5339\u914D\u9879"
       }), _react.default.createElement(_src.default, {
         multiple: true,
-        disabled: true,
+        disabled: false,
         labelInValue: true,
         onChange: this.handleChange2,
         defaultValue: "V03",
         style: {
           maxWidth: 300,
-          maxHeight: 400
+          height: 400
         }
       }, _react.default.createElement(ListItemGroup, {
         label: "V"
@@ -846,7 +847,7 @@ function (_React$Component) {
           value: item[valueField],
           prefixCls: itemPrefixCls,
           selected: markMap[item[valueField]],
-          disabled: disabled || item.disabled,
+          disabled: disabled || !!item.disabled,
           "data-index": itemIndex,
           onClick: _this3.onItemClick,
           onSelect: _this3.onItemSelect,
@@ -966,7 +967,13 @@ function (_React$Component) {
           _this$props7$style = _this$props7.style,
           style = _this$props7$style === void 0 ? {} : _this$props7$style,
           _this$props7$scrollVi = _this$props7.scrollViewBodyStyle,
-          scrollViewBodyStyle = _this$props7$scrollVi === void 0 ? {} : _this$props7$scrollVi;
+          scrollViewBodyStyle = _this$props7$scrollVi === void 0 ? {} : _this$props7$scrollVi,
+          WrapperComponent = _this$props7.wrapperComponent,
+          HeaderWrapperComponent = _this$props7.headerWrapperComponent,
+          BodyWrapperComponent = _this$props7.bodyWrapperComponent,
+          FooterWrapperComponent = _this$props7.footerWrapperComponent,
+          renderHeader = _this$props7.renderHeader,
+          renderFooter = _this$props7.renderFooter;
 
       if (width) {
         style.width = width;
@@ -976,18 +983,25 @@ function (_React$Component) {
         style.height = height;
       }
 
-      var classes = (0, _classnames.default)((_classNames = {}, (0, _defineProperty2.default)(_classNames, "".concat(prefixCls), true), (0, _defineProperty2.default)(_classNames, className, className), (0, _defineProperty2.default)(_classNames, "".concat(prefixCls, "-disabled"), disabled), _classNames));
-      return _react.default.createElement(_reactWidgetScrollview.default, {
+      var classes = (0, _classnames.default)((_classNames = {}, (0, _defineProperty2.default)(_classNames, "".concat(prefixCls), true), (0, _defineProperty2.default)(_classNames, className, className), (0, _defineProperty2.default)(_classNames, "".concat(prefixCls, "-disabled"), disabled), _classNames)); // scrollViewBodyCls={`${prefixCls}-body`}
+      // scrollViewBodyStyle={scrollViewBodyStyle}
+
+      return _react.default.createElement(WrapperComponent, {
         ref: this.saveListView,
         tabIndex: tabIndex,
-        scrollViewBodyCls: "".concat(prefixCls, "-body"),
-        scrollViewBodyStyle: scrollViewBodyStyle,
         className: classes,
         style: style,
         onKeyDown: enableDownUpSelect ? this.onKeyDown() : onKeyDown,
         onFocus: onFocus,
         onBlur: onBlur
-      }, this.getListItems());
+      }, renderHeader ? _react.default.createElement(HeaderWrapperComponent, {
+        className: "".concat(prefixCls, "-header")
+      }, renderHeader()) : null, _react.default.createElement(BodyWrapperComponent, {
+        className: "".concat(prefixCls, "-body"),
+        style: scrollViewBodyStyle
+      }, this.getListItems()), renderFooter ? _react.default.createElement(FooterWrapperComponent, {
+        className: "".concat(prefixCls, "-footer")
+      }, renderFooter()) : null);
     }
   }]);
   return ListBox;
@@ -1017,7 +1031,13 @@ exports.default = ListBox;
   onFocus: _propTypes.default.func,
   onBlur: _propTypes.default.func,
   onKeyDown: _propTypes.default.func,
-  scrollViewComponent: _propTypes.default.any
+  scrollViewComponent: _propTypes.default.any,
+  renderHeader: _propTypes.default.func,
+  renderFooter: _propTypes.default.func,
+  wrapperComponent: _propTypes.default.node,
+  headerWrapperComponent: _propTypes.default.node,
+  bodyWrapperComponent: _propTypes.default.node,
+  footerWrapperComponent: _propTypes.default.node
 });
 (0, _defineProperty2.default)(ListBox, "defaultProps", {
   prefixCls: 'nex-listbox',
@@ -1032,7 +1052,11 @@ exports.default = ListBox;
   onFocus: noop,
   onBlur: noop,
   onKeyDown: noop,
-  scrollViewComponent: _reactWidgetScrollview.default
+  scrollViewComponent: _reactWidgetScrollview.default,
+  wrapperComponent: "div",
+  headerWrapperComponent: 'div',
+  bodyWrapperComponent: 'div',
+  footerWrapperComponent: 'div'
 });
 
 /***/ }),
@@ -1750,12 +1774,12 @@ exports.isError = isError;
 /*! no static exports found */
 /***/ (function(module, exports, __webpack_require__) {
 
-__webpack_require__(/*! D:\wamp64\www\github-project\react-widget\listbox\node_modules\packez\lib\fetchPolyfills.js */"./node_modules/packez/lib/fetchPolyfills.js");
-__webpack_require__(/*! D:\wamp64\www\github-project\react-widget\listbox\node_modules\packez\lib\polyfills.js */"./node_modules/packez/lib/polyfills.js");
-module.exports = __webpack_require__(/*! D:\wamp64\www\github-project\react-widget\listbox\examples\index.js */"./examples/index.js");
+__webpack_require__(/*! D:\wamp\www\github-projects\react-widget\listbox\node_modules\packez\lib\fetchPolyfills.js */"./node_modules/packez/lib/fetchPolyfills.js");
+__webpack_require__(/*! D:\wamp\www\github-projects\react-widget\listbox\node_modules\packez\lib\polyfills.js */"./node_modules/packez/lib/polyfills.js");
+module.exports = __webpack_require__(/*! D:\wamp\www\github-projects\react-widget\listbox\examples\index.js */"./examples/index.js");
 
 
 /***/ })
 
 /******/ });
-//# sourceMappingURL=index.9f537ed7.js.map
+//# sourceMappingURL=index.1a730766.js.map

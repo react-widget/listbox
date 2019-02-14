@@ -45,6 +45,12 @@ export default class ListBox extends React.Component {
         onBlur: PropTypes.func,
         onKeyDown: PropTypes.func,
         scrollViewComponent: PropTypes.any,
+        renderHeader: PropTypes.func,
+        renderFooter: PropTypes.func,
+        wrapperComponent: PropTypes.node,
+        headerWrapperComponent: PropTypes.node,
+        bodyWrapperComponent: PropTypes.node,
+        footerWrapperComponent: PropTypes.node,
     };
 
     static defaultProps = {
@@ -61,7 +67,10 @@ export default class ListBox extends React.Component {
         onBlur: noop,
         onKeyDown: noop,
         scrollViewComponent: ScrollView,
-
+        wrapperComponent: "div",
+        headerWrapperComponent: 'div',
+        bodyWrapperComponent: 'div',
+        footerWrapperComponent: 'div',
     };
 
     constructor(props) {
@@ -325,7 +334,7 @@ export default class ListBox extends React.Component {
                     value={item[valueField]}
                     prefixCls={itemPrefixCls}
                     selected={markMap[item[valueField]]}
-                    disabled={disabled || item.disabled}
+                    disabled={disabled || !!item.disabled}
                     data-index={itemIndex}
                     onClick={this.onItemClick}
                     onSelect={this.onItemSelect}
@@ -437,7 +446,13 @@ export default class ListBox extends React.Component {
             onFocus,
             onBlur,
             style = {},
-            scrollViewBodyStyle = {}
+            scrollViewBodyStyle = {},
+            wrapperComponent: WrapperComponent,
+            headerWrapperComponent: HeaderWrapperComponent,
+            bodyWrapperComponent: BodyWrapperComponent,
+            footerWrapperComponent: FooterWrapperComponent,
+            renderHeader,
+            renderFooter,
         } = this.props;
 
         if (width) {
@@ -453,20 +468,45 @@ export default class ListBox extends React.Component {
             [`${prefixCls}-disabled`]: disabled,
         });
 
+        // scrollViewBodyCls={`${prefixCls}-body`}
+        // scrollViewBodyStyle={scrollViewBodyStyle}
+
         return (
-            <ScrollView
+            <WrapperComponent
                 ref={this.saveListView}
                 tabIndex={tabIndex}
-                scrollViewBodyCls={`${prefixCls}-body`}
-                scrollViewBodyStyle={scrollViewBodyStyle}
                 className={classes}
                 style={style}
                 onKeyDown={enableDownUpSelect ? this.onKeyDown() : onKeyDown}
                 onFocus={onFocus}
                 onBlur={onBlur}
             >
-                {this.getListItems()}
-            </ScrollView>
+                {
+                    renderHeader ?
+                        <HeaderWrapperComponent
+                            className={`${prefixCls}-header`}
+                        >
+                            {renderHeader()}
+                        </HeaderWrapperComponent> :
+                        null
+                }
+
+                <BodyWrapperComponent
+                    className={`${prefixCls}-body`}
+                    style={scrollViewBodyStyle}
+                >
+                    {this.getListItems()}
+                </BodyWrapperComponent>
+                {
+                    renderFooter ?
+                        <FooterWrapperComponent
+                            className={`${prefixCls}-footer`}
+                        >
+                            {renderFooter()}
+                        </FooterWrapperComponent> :
+                        null
+                }
+            </WrapperComponent>
         );
     }
 

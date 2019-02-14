@@ -5,7 +5,9 @@ $listboxItemHeight: 26px !default;
 	background:#FFF;
 	overflow: hidden;
 	box-sizing: border-box;
-	border:1px solid #999;
+    border:1px solid #999;
+    display: flex;
+    flex-direction: column;
 	&:focus{
 		outline:0;	
 	}
@@ -13,6 +15,10 @@ $listboxItemHeight: 26px !default;
 		border:1px solid #b3b3b3;
 	}
 	.nex-listbox-body {
+       flex: 1;
+        overflow: hidden;
+        overflow-y: auto;
+
 		.nex-listbox-item-group-title,
 		.nex-listbox-item {
 			//list-style:none;
