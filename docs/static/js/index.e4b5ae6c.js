@@ -555,7 +555,6 @@ var _classes = __webpack_require__(/*! bplokjs-dom-utils/classes */ "./node_modu
 
 var _scrollIntoView = _interopRequireDefault(__webpack_require__(/*! bplokjs-dom-utils/scrollIntoView */ "./node_modules/bplokjs-dom-utils/scrollIntoView.js"));
 
-//import ScrollView from 'react-widget-scrollview';
 function noop() {}
 
 function copy(data) {
@@ -1062,7 +1061,6 @@ exports.default = ListBox;
   onFocus: _propTypes.default.func,
   onBlur: _propTypes.default.func,
   onKeyDown: _propTypes.default.func,
-  //scrollViewComponent: PropTypes.any,
   renderHeader: _propTypes.default.func,
   renderFooter: _propTypes.default.func,
   wrapperComponent: _propTypes.default.node,
@@ -1083,7 +1081,6 @@ exports.default = ListBox;
   onFocus: noop,
   onBlur: noop,
   onKeyDown: noop,
-  //scrollViewComponent: ScrollView,
   wrapperComponent: "div",
   headerWrapperComponent: 'div',
   bodyWrapperComponent: 'div',
@@ -1439,4 +1436,4 @@ module.exports = __webpack_require__(/*! D:\wamp\www\github-projects\react-widge
 /***/ })
 
 /******/ });
-//# sourceMappingURL=index.db30889e.js.map
+//# sourceMappingURL=index.e4b5ae6c.js.map

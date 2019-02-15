@@ -54,12 +54,13 @@ $listboxItemHeight: auto !default;
 		
 		.#{$prefixCls}-item-group-title {
 			padding:$listboxItemPadding;
-			cursor:default;
-			color: #999;
+            cursor:default;
+            font-weight: 700;
+			//color: #999;
 		}
 		
 		.#{$prefixCls}-item-group-list .#{$prefixCls}-item {
-			padding-left:20px;	
+			padding-left:28px;	
 		}
 	
 	}
