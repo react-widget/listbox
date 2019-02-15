@@ -1,11 +1,12 @@
-$listboxItemPadding: 0 10px !default;
-$listboxItemHeight: 26px !default;
+$prefixCls: rw-listbox;
+$listboxItemPadding: 8px 12px !default;
+$listboxItemHeight: auto !default;
 
-.nex-listbox {
+.#{$prefixCls} {
 	background:#FFF;
 	overflow: hidden;
 	box-sizing: border-box;
-    border:1px solid #999;
+    border:1px solid #e5e5ea;
     display: flex;
     flex-direction: column;
 	&:focus{
@@ -14,13 +15,13 @@ $listboxItemHeight: 26px !default;
 	&-disabled {
 		border:1px solid #b3b3b3;
 	}
-	.nex-listbox-body {
-       flex: 1;
+	.#{$prefixCls}-body {
+        flex: 1;
         overflow: hidden;
         overflow-y: auto;
 
-		.nex-listbox-item-group-title,
-		.nex-listbox-item {
+		.#{$prefixCls}-item-group-title,
+		.#{$prefixCls}-item {
 			//list-style:none;
 			position:relative;
 			padding:$listboxItemPadding;
@@ -31,31 +32,33 @@ $listboxItemHeight: 26px !default;
 			overflow:hidden;
 		}
 		
-		//.nex-listbox-item:hover,
-		.nex-listbox-item-active {
-			background: #ecedef;
+		//hover
+		.#{$prefixCls}-item-active {
+            background: rgba(235,249,255,.5);
+         //   color: #575757;
 		}
 		
-		.nex-listbox-item-selected {
-			background: #e2ecf7;
+		.#{$prefixCls}-item-selected {
+            background: #ebf9ff;
+            
 		}
 		
-		.nex-listbox-item-disabled {
+		.#{$prefixCls}-item-disabled {
 			opacity: .5;
 			cursor: default;
-			&:not(.nex-listbox-item-selected):hover {
+			&:not(.#{$prefixCls}-item-selected):hover {
 				background: none;
 				//color: rgba(0,0,0,.25);
 			}	
 		}
 		
-		.nex-listbox-item-group-title {
+		.#{$prefixCls}-item-group-title {
 			padding:$listboxItemPadding;
 			cursor:default;
 			color: #999;
 		}
 		
-		.nex-listbox-item-group-list .nex-listbox-item {
+		.#{$prefixCls}-item-group-list .#{$prefixCls}-item {
 			padding-left:20px;	
 		}
 	

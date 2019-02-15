@@ -17,7 +17,7 @@ export default class ListItem extends React.Component {
     }
 
     static defaultProps = {
-        prefixCls: 'nex-listbox-item',
+        prefixCls: 'rw-listbox-item',
         value: '',
         selected: false,
         disabled: false,

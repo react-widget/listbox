@@ -3,15 +3,11 @@ import { findDOMNode } from 'react-dom';
 import PropTypes from 'prop-types';
 import classNames from 'classnames';
 import omit from 'object.omit';
-import ScrollView from 'react-widget-scrollview';
 import ListItem from './ListItem';
 import ListItemGroup from './ListItemGroup';
 import { isArray, isUndefined, isEqual, each } from './util';
 import { hasClass, addClass, removeClass } from 'bplokjs-dom-utils/classes';
-
-// function ScrollView(props) {
-//     return <div {...props} />
-// }
+import scrollIntoView from 'bplokjs-dom-utils/scrollIntoView';
 
 function noop() { }
 
@@ -26,7 +22,7 @@ export default class ListBox extends React.Component {
         style: PropTypes.object,
         headerStyle: PropTypes.object,
         footerStyle: PropTypes.object,
-        scrollViewBodyStyle: PropTypes.object,
+        bodyStyle: PropTypes.object,
         prefixCls: PropTypes.string,
         valueField: PropTypes.string,
         labelField: PropTypes.string,
@@ -46,7 +42,6 @@ export default class ListBox extends React.Component {
         onFocus: PropTypes.func,
         onBlur: PropTypes.func,
         onKeyDown: PropTypes.func,
-        scrollViewComponent: PropTypes.any,
         renderHeader: PropTypes.func,
         renderFooter: PropTypes.func,
         wrapperComponent: PropTypes.node,
@@ -56,7 +51,7 @@ export default class ListBox extends React.Component {
     };
 
     static defaultProps = {
-        prefixCls: 'nex-listbox',
+        prefixCls: 'rw-listbox',
         valueField: 'value',
         labelField: 'label',
         itemsField: 'items',
@@ -68,7 +63,6 @@ export default class ListBox extends React.Component {
         onFocus: noop,
         onBlur: noop,
         onKeyDown: noop,
-        scrollViewComponent: ScrollView,
         wrapperComponent: "div",
         headerWrapperComponent: 'div',
         bodyWrapperComponent: 'div',
@@ -81,9 +75,13 @@ export default class ListBox extends React.Component {
         const selectedValue = [];
         let value;
 
-        if (!isUndefined(props.value)) {
-            value = isArray(props.value) ? props.value : [props.value];
-        } else if (!isUndefined(props.defaultValue)) {
+        // if (!isUndefined(props.value)) {
+        //     value = isArray(props.value) ? props.value : [props.value];
+        // } else if (!isUndefined(props.defaultValue)) {
+        //     value = isArray(props.defaultValue) ? props.defaultValue : [props.defaultValue];
+        // }
+
+        if (!isUndefined(props.defaultValue)) {
             value = isArray(props.defaultValue) ? props.defaultValue : [props.defaultValue];
         }
 
@@ -105,18 +103,30 @@ export default class ListBox extends React.Component {
         };
     }
 
-    componentWillReceiveProps({ value }) {
+    static getDerivedStateFromProps(nextProps, prevState) {
+        const value = nextProps.value;
+
         if (!isUndefined(value)) {
-            this.setState({
+            return {
                 selectedValue: isArray(value) ? copy(value) : [value]
-            });
+            };
         }
+
+        return {};
     }
+
+    // componentWillReceiveProps({ value }) {
+    //     if (!isUndefined(value)) {
+    //         this.setState({
+    //             selectedValue: isArray(value) ? copy(value) : [value]
+    //         });
+    //     }
+    // }
 
     componentDidMount() {
         const { prefixCls, autoFocus } = this.props;
         const el = findDOMNode(this);
-        const scrollview = this.getListView();//this.refs.listbox;
+        //const scrollview = this.getListView();//this.refs.listbox;
         const selector = `.${prefixCls}-item-selected`;
 
         if (autoFocus) {
@@ -125,7 +135,8 @@ export default class ListBox extends React.Component {
 
         const selectedItem = el.querySelector(selector);
         if (selectedItem) {
-            scrollview.scrollIntoView(selectedItem);
+            scrollIntoView(selectedItem);
+            //scrollview.scrollIntoView(selectedItem);
         }
     }
 
@@ -139,8 +150,10 @@ export default class ListBox extends React.Component {
 
     onItemClick = (item, e) => {
         const { onItemClick } = this.props;
-        if (e)
-            this.getListView().scrollIntoView(e.target);
+        if (e) {
+            scrollIntoView(e.target);
+        }
+        //this.getListView().scrollIntoView(e.target);
 
         if (onItemClick) onItemClick(item);
     }
@@ -212,12 +225,12 @@ export default class ListBox extends React.Component {
 
     }
 
-    onKeyDown() {
+    onKeyDown = (e) => {
         const { prefixCls } = this.props;
         const selector = `.${prefixCls}-item:not(.${prefixCls}-item-disabled)`;
         const activeCls = `${prefixCls}-item-active`;
         const selectCls = `${prefixCls}-item-selected`;
-        let list = null;//NodeList
+        let list = null;//NodeList[]
 
         function getActiveIndex(keyCode) {
             let idx = -1;
@@ -244,65 +257,64 @@ export default class ListBox extends React.Component {
             return idx === -1 ? sIdx : idx;
         }
 
-        return (e) => {
-            const scrollview = this.getListView();//this.refs.listbox;
-            const props = this.props;
-            const state = this.state;
-            const dom = findDOMNode(this);
-            const UP = e.keyCode === 38;
-            const DOWN = e.keyCode === 40;
-            const ENTER = e.keyCode === 13;
-            const indexValueMap = this._indexValueMap;
-            const activeIndex = this._activeIndex;
+        const props = this.props;
+        const state = this.state;
+        const dom = findDOMNode(this);
+        const UP = e.keyCode === 38;
+        const DOWN = e.keyCode === 40;
+        const ENTER = e.keyCode === 13;
+        const indexValueMap = this._indexValueMap;
+        const activeIndex = this._activeIndex;
 
-            if (props.enableDownUpSelect)
-                props.onKeyDown(e);
-
-            if (!list) {
-                list = dom.querySelectorAll(selector);
-            }
-
-            if (!list.length) return;
-
-            const minIndex = 0;
-            const maxIndex = list.length - 1;
-
-            if (UP || DOWN) {
-                e.preventDefault();
-                let idx = getActiveIndex(e.keyCode);
-
-                if (UP) {
-                    idx = idx === -1 ? maxIndex : --idx;
-                    if (idx < 0) idx = maxIndex;
-                    addClass(list[idx], activeCls);
-                } else {
-                    idx = idx === -1 ? minIndex : ++idx;
-                    if (idx > maxIndex) idx = 0;
-                    addClass(list[idx], activeCls);
-                }
-
-                this._activeIndex = list[idx].getAttribute('data-index');
-
-                scrollview.scrollIntoView(list[idx]);
-            } else if (ENTER && activeIndex !== null) {
-                const value = indexValueMap[activeIndex];
-                const item = state.itemsMap[value] || {};
-                this.setValue(value);
-                //触发onItemClick
-                this.onItemClick({
-                    value,
-                    label: item[props.labelField]
-                });
-            }
+        if (props.enableDownUpSelect) {
+            props.onKeyDown(e);
         }
+
+        if (!list) {
+            list = dom.querySelectorAll(selector);
+        }
+
+        if (!list.length) return;
+
+        const minIndex = 0;
+        const maxIndex = list.length - 1;
+
+        if (UP || DOWN) {
+            e.preventDefault();
+            let idx = getActiveIndex(e.keyCode);
+
+            if (UP) {
+                idx = idx === -1 ? maxIndex : --idx;
+                if (idx < 0) idx = maxIndex;
+                addClass(list[idx], activeCls);
+            } else {
+                idx = idx === -1 ? minIndex : ++idx;
+                if (idx > maxIndex) idx = 0;
+                addClass(list[idx], activeCls);
+            }
+
+            this._activeIndex = list[idx].getAttribute('data-index');
+            scrollIntoView(list[idx]);
+            //scrollview.scrollIntoView(list[idx]);
+        } else if (ENTER && activeIndex !== null) {
+            const value = indexValueMap[activeIndex];
+            const item = state.itemsMap[value] || {};
+            this.setValue(value);
+            //触发onItemClick
+            this.onItemClick({
+                value,
+                label: item[props.labelField]
+            });
+        }
+
     }
 
-    renderListItems(items, markMap) {
+    renderListItems(items, selectedMap) {
         const { labelField, valueField, itemsField, prefixCls, disabled } = this.props;
         const { itemsMap } = this.state;
 
         return items.map(item => {
-            if (typeof item === 'string') {
+            if (typeof item === 'string' || typeof item === 'number') {
                 item = {
                     [labelField]: item,
                     [valueField]: item,
@@ -335,7 +347,7 @@ export default class ListBox extends React.Component {
                     key={item[valueField]}
                     value={item[valueField]}
                     prefixCls={itemPrefixCls}
-                    selected={markMap[item[valueField]]}
+                    selected={selectedMap[item[valueField]]}
                     disabled={disabled || !!item.disabled}
                     data-index={itemIndex}
                     onClick={this.onItemClick}
@@ -347,14 +359,18 @@ export default class ListBox extends React.Component {
                     {item[labelField]}
                 </ListItem>
             ) : (
-                    <ListItemGroup prefixCls={`${itemPrefixCls}-group`} key={item[labelField]} label={item[labelField]}>
-                        {this.renderListItems(item[itemsField] || [], markMap)}
+                    <ListItemGroup
+                        prefixCls={`${itemPrefixCls}-group`}
+                        key={item[labelField]}
+                        label={item[labelField]}
+                    >
+                        {this.renderListItems(item[itemsField] || [], selectedMap)}
                     </ListItemGroup>
                 );
         });
     }
 
-    renderListChild(children, markMap) {
+    renderListChild(children, selectedMap) {
         const { labelField, valueField, itemsField, prefixCls, disabled } = this.props;
         const { itemsMap } = this.state;
 
@@ -365,17 +381,27 @@ export default class ListBox extends React.Component {
             const props = child.props;
 
             if (child.type.isListItemGroup) {
-                return React.cloneElement(child, {}, this.renderListChild(props.children, markMap));
+                return React.cloneElement(
+                    child,
+                    {
+                        prefixCls: `${itemPrefixCls}-group`
+                    },
+                    this.renderListChild(props.children, selectedMap)
+                );
             }
 
             let onMouseEnter = noop;
             let onMouseLeave = noop;
             let itemIndex = this._itemIndex++;
 
-            itemsMap[props[valueField]] = Object.assign({}, omit(props, ['children', 'selected', 'prefixCls']), { [labelField]: props.children });
+            itemsMap[props[valueField]] = Object.assign(
+                {},
+                omit(props, ['children', 'selected', 'prefixCls']),
+                { [labelField]: props.children }
+            );
             this._indexValueMap[itemIndex] = props[valueField];
 
-            if (!props.disabled) {
+            if (!props.disabled && !disabled) {
                 onMouseEnter = e => {
                     addClass(e.currentTarget, activeCls);
                     if (props.onMouseEnter) props.onMouseEnter(e);
@@ -387,7 +413,7 @@ export default class ListBox extends React.Component {
             }
 
             const newProps = {
-                selected: markMap[props[valueField]],
+                selected: selectedMap[props[valueField]],
                 prefixCls: itemPrefixCls,
                 'data-index': itemIndex,
                 onClick: this.onItemClick,
@@ -405,22 +431,22 @@ export default class ListBox extends React.Component {
         });
     }
 
-    getListItems() {
+    renderList() {
         const { labelField, valueField, prefixCls, multiple, items, emptyLabel, children } = this.props;
         const { selectedValue } = this.state;
 
         this.state.itemsMap = {};
 
-        const markMap = {};
-        selectedValue.forEach(v => markMap[v] = true);
+        const selectedMap = {};
+        selectedValue.forEach(v => selectedMap[v] = true);
 
         this._itemIndex = 0;
         this._indexValueMap = {};
         this._activeIndex = null;
 
         const childs = items.length ?
-            this.renderListItems(items, markMap) :
-            this.renderListChild(children, markMap);
+            this.renderListItems(items, selectedMap) :
+            this.renderListChild(children, selectedMap);
 
         return React.Children.count(childs) ? childs : emptyLabel;
     }
@@ -430,7 +456,7 @@ export default class ListBox extends React.Component {
     }
 
     getListView() {
-        return this._listview;
+        return findDOMNode(this._listview);
     }
 
     render() {
@@ -448,7 +474,7 @@ export default class ListBox extends React.Component {
             onFocus,
             onBlur,
             style = {},
-            scrollViewBodyStyle = {},
+            bodyStyle = {},
             wrapperComponent: WrapperComponent,
             headerWrapperComponent: HeaderWrapperComponent,
             bodyWrapperComponent: BodyWrapperComponent,
@@ -481,7 +507,7 @@ export default class ListBox extends React.Component {
                 tabIndex={tabIndex}
                 className={classes}
                 style={style}
-                onKeyDown={enableDownUpSelect ? this.onKeyDown() : onKeyDown}
+                onKeyDown={enableDownUpSelect ? this.onKeyDown : onKeyDown}
                 onFocus={onFocus}
                 onBlur={onBlur}
             >
@@ -498,9 +524,9 @@ export default class ListBox extends React.Component {
 
                 <BodyWrapperComponent
                     className={`${prefixCls}-body`}
-                    style={scrollViewBodyStyle}
+                    style={bodyStyle}
                 >
-                    {this.getListItems()}
+                    {this.renderList()}
                 </BodyWrapperComponent>
                 {
                     renderFooter ?
