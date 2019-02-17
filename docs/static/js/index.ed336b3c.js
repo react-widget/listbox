@@ -468,12 +468,11 @@ __webpack_require__(/*! ./style/index.scss */ "./examples/style/index.scss");
 
 __webpack_require__(/*! ./style/animate.scss */ "./examples/style/animate.scss");
 
-__webpack_require__(/*! react-widget-scrollview/lib/style/index.css */ "./node_modules/react-widget-scrollview/lib/style/index.css");
-
 __webpack_require__(/*! ../src/style/index.scss */ "./src/style/index.scss");
 
 var _Demo = _interopRequireDefault(__webpack_require__(/*! ./Demo */ "./examples/Demo.js"));
 
+//import 'react-widget-scrollview/lib/style/index.css';
 _reactDom.default.render(_react.default.createElement(_Demo.default, null), demo);
 
 /***/ }),
@@ -575,7 +574,7 @@ function (_React$Component) {
       var onItemClick = _this.props.onItemClick;
 
       if (e) {
-        (0, _scrollIntoView.default)(e.target);
+        (0, _scrollIntoView.default)(e.target, _this.getListViewBody());
       } //this.getListView().scrollIntoView(e.target);
 
 
@@ -677,7 +676,7 @@ function (_React$Component) {
         }
 
         _this._activeIndex = list[idx].getAttribute('data-index');
-        (0, _scrollIntoView.default)(list[idx]); //scrollview.scrollIntoView(list[idx]);
+        (0, _scrollIntoView.default)(list[idx], _this.getListViewBody()); //scrollview.scrollIntoView(list[idx]);
       } else if (ENTER && activeIndex !== null) {
         var value = indexValueMap[activeIndex];
         var item = state.itemsMap[value] || {};
@@ -693,6 +692,15 @@ function (_React$Component) {
     });
     (0, _defineProperty2.default)((0, _assertThisInitialized2.default)((0, _assertThisInitialized2.default)(_this)), "saveListView", function (node) {
       _this._listview = node;
+    });
+    (0, _defineProperty2.default)((0, _assertThisInitialized2.default)((0, _assertThisInitialized2.default)(_this)), "saveListViewHeader", function (node) {
+      _this._listview_header = node;
+    });
+    (0, _defineProperty2.default)((0, _assertThisInitialized2.default)((0, _assertThisInitialized2.default)(_this)), "saveListViewBody", function (node) {
+      _this._listview_body = node;
+    });
+    (0, _defineProperty2.default)((0, _assertThisInitialized2.default)((0, _assertThisInitialized2.default)(_this)), "saveListViewFooter", function (node) {
+      _this._listview_footer = node;
     });
     var _selectedValue = [];
 
@@ -748,7 +756,7 @@ function (_React$Component) {
       var selectedItem = el.querySelector(selector);
 
       if (selectedItem) {
-        (0, _scrollIntoView.default)(selectedItem); //scrollview.scrollIntoView(selectedItem);
+        (0, _scrollIntoView.default)(selectedItem, this.getListViewBody()); //scrollview.scrollIntoView(selectedItem);
       }
     }
   }, {
@@ -956,6 +964,21 @@ function (_React$Component) {
       return (0, _reactDom.findDOMNode)(this._listview);
     }
   }, {
+    key: "getListViewHeader",
+    value: function getListViewHeader() {
+      return (0, _reactDom.findDOMNode)(this._listview_header);
+    }
+  }, {
+    key: "getListViewBody",
+    value: function getListViewBody() {
+      return (0, _reactDom.findDOMNode)(this._listview_body);
+    }
+  }, {
+    key: "getListViewFooter",
+    value: function getListViewFooter() {
+      return (0, _reactDom.findDOMNode)(this._listview_footer);
+    }
+  }, {
     key: "render",
     value: function render() {
       var _classNames;
@@ -1008,12 +1031,15 @@ function (_React$Component) {
         onFocus: onFocus,
         onBlur: onBlur
       }, renderHeader ? _react.default.createElement(HeaderWrapperComponent, {
+        ref: this.saveListViewHeader,
         className: "".concat(prefixCls, "-header"),
         style: headerStyle
       }, renderHeader()) : null, _react.default.createElement(BodyWrapperComponent, {
+        ref: this.saveListViewBody,
         className: "".concat(prefixCls, "-body"),
         style: bodyStyle
       }, this.renderList()), renderFooter ? _react.default.createElement(FooterWrapperComponent, {
+        ref: this.saveListViewFooter,
         className: "".concat(prefixCls, "-footer"),
         style: footerStyle
       }, renderFooter()) : null);
@@ -1436,4 +1462,4 @@ module.exports = __webpack_require__(/*! D:\wamp\www\github-projects\react-widge
 /***/ })
 
 /******/ });
-//# sourceMappingURL=index.e4b5ae6c.js.map
+//# sourceMappingURL=index.ed336b3c.js.map

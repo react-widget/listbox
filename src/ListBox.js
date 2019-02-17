@@ -135,7 +135,7 @@ export default class ListBox extends React.Component {
 
         const selectedItem = el.querySelector(selector);
         if (selectedItem) {
-            scrollIntoView(selectedItem);
+            scrollIntoView(selectedItem, this.getListViewBody());
             //scrollview.scrollIntoView(selectedItem);
         }
     }
@@ -151,7 +151,7 @@ export default class ListBox extends React.Component {
     onItemClick = (item, e) => {
         const { onItemClick } = this.props;
         if (e) {
-            scrollIntoView(e.target);
+            scrollIntoView(e.target, this.getListViewBody());
         }
         //this.getListView().scrollIntoView(e.target);
 
@@ -294,7 +294,7 @@ export default class ListBox extends React.Component {
             }
 
             this._activeIndex = list[idx].getAttribute('data-index');
-            scrollIntoView(list[idx]);
+            scrollIntoView(list[idx], this.getListViewBody());
             //scrollview.scrollIntoView(list[idx]);
         } else if (ENTER && activeIndex !== null) {
             const value = indexValueMap[activeIndex];
@@ -455,8 +455,32 @@ export default class ListBox extends React.Component {
         this._listview = node;
     }
 
+    saveListViewHeader = (node) => {
+        this._listview_header = node;
+    }
+
+    saveListViewBody = (node) => {
+        this._listview_body = node;
+    }
+
+    saveListViewFooter = (node) => {
+        this._listview_footer = node;
+    }
+
     getListView() {
         return findDOMNode(this._listview);
+    }
+
+    getListViewHeader() {
+        return findDOMNode(this._listview_header);
+    }
+
+    getListViewBody() {
+        return findDOMNode(this._listview_body);
+    }
+
+    getListViewFooter() {
+        return findDOMNode(this._listview_footer);
     }
 
     render() {
@@ -514,6 +538,7 @@ export default class ListBox extends React.Component {
                 {
                     renderHeader ?
                         <HeaderWrapperComponent
+                            ref={this.saveListViewHeader}
                             className={`${prefixCls}-header`}
                             style={headerStyle}
                         >
@@ -523,6 +548,7 @@ export default class ListBox extends React.Component {
                 }
 
                 <BodyWrapperComponent
+                    ref={this.saveListViewBody}
                     className={`${prefixCls}-body`}
                     style={bodyStyle}
                 >
@@ -531,6 +557,7 @@ export default class ListBox extends React.Component {
                 {
                     renderFooter ?
                         <FooterWrapperComponent
+                            ref={this.saveListViewFooter}
                             className={`${prefixCls}-footer`}
                             style={footerStyle}
                         >

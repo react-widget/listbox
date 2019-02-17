@@ -1025,7 +1025,7 @@ module.exports = function scrollPrarent(node) {
       excludeStatic = position === 'absolute',
       ownerDoc = node.ownerDocument,
       overflowRegex = /(auto|scroll)/;
-  if (position === 'fixed') return ownerDoc || document;
+  if (position === 'fixed') return (ownerDoc || document).documentElement;
 
   while ((node = node.parentNode) && node.nodeType !== 9) {
     var isStatic = excludeStatic && (0, _css.default)(node, 'position') === 'static',
@@ -1035,7 +1035,7 @@ module.exports = function scrollPrarent(node) {
     if (overflowRegex.test(style) && hasScroll) return node;
   }
 
-  return document;
+  return document.documentElement;
 };
 
 /***/ }),
@@ -26116,17 +26116,6 @@ if (false) {} else {
 
 /***/ }),
 
-/***/ "./node_modules/react-widget-scrollview/lib/style/index.css":
-/*!******************************************************************!*\
-  !*** ./node_modules/react-widget-scrollview/lib/style/index.css ***!
-  \******************************************************************/
-/*! no static exports found */
-/***/ (function(module, exports, __webpack_require__) {
-
-// extracted by mini-css-extract-plugin
-
-/***/ }),
-
 /***/ "./node_modules/react/cjs/react.development.js":
 /*!*****************************************************!*\
   !*** ./node_modules/react/cjs/react.development.js ***!
@@ -29736,4 +29725,4 @@ if (!self.fetch) {
 /***/ })
 
 }]);
-//# sourceMappingURL=vendors.97067170.chunk.js.map
+//# sourceMappingURL=vendors.308b581e.chunk.js.map
