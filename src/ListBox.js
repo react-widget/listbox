@@ -26,7 +26,7 @@ export default class ListBox extends React.Component {
         prefixCls: PropTypes.string,
         valueField: PropTypes.string,
         labelField: PropTypes.string,
-        itemsField: PropTypes.string,
+        childrenField: PropTypes.string,
         items: PropTypes.array,
         emptyLabel: PropTypes.any,
         multiple: PropTypes.bool,
@@ -54,7 +54,7 @@ export default class ListBox extends React.Component {
         prefixCls: 'rw-listbox',
         valueField: 'value',
         labelField: 'label',
-        itemsField: 'items',
+        childrenField: 'children',
         labelInValue: false,
         tabIndex: 0,
         items: [],
@@ -310,7 +310,7 @@ export default class ListBox extends React.Component {
     }
 
     renderListItems(items, selectedMap) {
-        const { labelField, valueField, itemsField, prefixCls, disabled } = this.props;
+        const { labelField, valueField, childrenField, prefixCls, disabled } = this.props;
         const { itemsMap } = this.state;
 
         return items.map(item => {
@@ -321,7 +321,7 @@ export default class ListBox extends React.Component {
                 }
             }
 
-            const isGroup = item[itemsField];
+            const isGroup = item[childrenField];
             const itemPrefixCls = `${prefixCls}-item`;
             const activeCls = `${prefixCls}-item-active`;
             let onMouseEnter = noop;
@@ -364,14 +364,14 @@ export default class ListBox extends React.Component {
                         key={item[labelField]}
                         label={item[labelField]}
                     >
-                        {this.renderListItems(item[itemsField] || [], selectedMap)}
+                        {this.renderListItems(item[childrenField] || [], selectedMap)}
                     </ListItemGroup>
                 );
         });
     }
 
     renderListChild(children, selectedMap) {
-        const { labelField, valueField, itemsField, prefixCls, disabled } = this.props;
+        const { labelField, valueField, childrenField, prefixCls, disabled } = this.props;
         const { itemsMap } = this.state;
 
         const itemPrefixCls = `${prefixCls}-item`;

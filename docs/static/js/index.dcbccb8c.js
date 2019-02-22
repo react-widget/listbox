@@ -323,7 +323,7 @@ var uuid = 100;
 for (var i = 0; i < 10; i++) {
   var items = [];
   var d = {
-    items: items,
+    children: items,
     label: '分组' + (i + 1)
   };
   dataset.push(d);
@@ -824,7 +824,7 @@ function (_React$Component) {
       var _this$props4 = this.props,
           labelField = _this$props4.labelField,
           valueField = _this$props4.valueField,
-          itemsField = _this$props4.itemsField,
+          childrenField = _this$props4.childrenField,
           prefixCls = _this$props4.prefixCls,
           disabled = _this$props4.disabled;
       var itemsMap = this.state.itemsMap;
@@ -835,7 +835,7 @@ function (_React$Component) {
           item = (_item = {}, (0, _defineProperty2.default)(_item, labelField, item), (0, _defineProperty2.default)(_item, valueField, item), _item);
         }
 
-        var isGroup = item[itemsField];
+        var isGroup = item[childrenField];
         var itemPrefixCls = "".concat(prefixCls, "-item");
         var activeCls = "".concat(prefixCls, "-item-active");
         var onMouseEnter = noop;
@@ -873,7 +873,7 @@ function (_React$Component) {
           prefixCls: "".concat(itemPrefixCls, "-group"),
           key: item[labelField],
           label: item[labelField]
-        }, _this2.renderListItems(item[itemsField] || [], selectedMap));
+        }, _this2.renderListItems(item[childrenField] || [], selectedMap));
       });
     }
   }, {
@@ -884,7 +884,7 @@ function (_React$Component) {
       var _this$props5 = this.props,
           labelField = _this$props5.labelField,
           valueField = _this$props5.valueField,
-          itemsField = _this$props5.itemsField,
+          childrenField = _this$props5.childrenField,
           prefixCls = _this$props5.prefixCls,
           disabled = _this$props5.disabled;
       var itemsMap = this.state.itemsMap;
@@ -1071,7 +1071,7 @@ exports.default = ListBox;
   prefixCls: _propTypes.default.string,
   valueField: _propTypes.default.string,
   labelField: _propTypes.default.string,
-  itemsField: _propTypes.default.string,
+  childrenField: _propTypes.default.string,
   items: _propTypes.default.array,
   emptyLabel: _propTypes.default.any,
   multiple: _propTypes.default.bool,
@@ -1098,7 +1098,7 @@ exports.default = ListBox;
   prefixCls: 'rw-listbox',
   valueField: 'value',
   labelField: 'label',
-  itemsField: 'items',
+  childrenField: 'children',
   labelInValue: false,
   tabIndex: 0,
   items: [],
@@ -1462,4 +1462,4 @@ module.exports = __webpack_require__(/*! D:\wamp\www\github-projects\react-widge
 /***/ })
 
 /******/ });
-//# sourceMappingURL=index.ed336b3c.js.map
+//# sourceMappingURL=index.dcbccb8c.js.map

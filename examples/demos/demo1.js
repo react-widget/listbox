@@ -10,7 +10,7 @@ var uuid = 100;
 for (let i = 0; i < 10; i++) {
     const items = [];
     const d = {
-        items,
+        children: items,
         label: '分组' + (i + 1)
     }
 
