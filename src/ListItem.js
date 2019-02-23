@@ -14,6 +14,7 @@ export default class ListItem extends React.Component {
         onClick: PropTypes.func,
         selected: PropTypes.bool,
         disabled: PropTypes.bool,
+        item: PropTypes.object,
     }
 
     static defaultProps = {
@@ -31,22 +32,22 @@ export default class ListItem extends React.Component {
     }
 
     handleItemClick = (e) => {
-        const { onSelect, onDeselect, onClick, selected, disabled, value, children } = this.props;
+        const { onSelect, onDeselect, onClick, selected, disabled, value, children, item } = this.props;
         if (disabled) return;
 
-        const item = {
+        const newItem = item || {
             value,
             label: children
         };
 
         if (onClick) {
-            onClick(item, e);
+            onClick(newItem, e);
         }
 
         if (!selected) {
-            onSelect && onSelect(item, this.refs.item)
+            onSelect && onSelect(newItem, this.refs.item)
         } else {
-            onDeselect && onDeselect(item, this.refs.item)
+            onDeselect && onDeselect(newItem, this.refs.item)
         }
     }
 

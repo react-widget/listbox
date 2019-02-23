@@ -8,6 +8,8 @@ export default class ItemGroup extends React.Component {
         value: PropTypes.any,
         children: PropTypes.node,
         prefixCls: PropTypes.string,
+        onClick: PropTypes.func,
+        item: PropTypes.object,
     }
 
     static defaultProps = {
@@ -21,11 +23,13 @@ export default class ItemGroup extends React.Component {
         const {
             value,
             label,
-            children
+            children,
+            onClick,
+            item
         } = this.props;
 
         if (onClick) {
-            onClick({
+            onClick(item || {
                 value, label, children
             }, e);
         }

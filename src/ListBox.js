@@ -62,7 +62,7 @@ export default class ListBox extends React.Component {
         labelInValue: false,
         tabIndex: 0,
         items: [],
-        emptyLabel: null,
+        emptyLabel: 'Not Found',
         enableDownUpSelect: true,
         onFocus: noop,
         onBlur: noop,
@@ -367,6 +367,7 @@ export default class ListBox extends React.Component {
                     onDeselect={this.onItemDeselect}
                     onMouseEnter={onMouseEnter}
                     onMouseLeave={onMouseLeave}
+                    item={item}
                 >
                     {renderMenuItem ? renderMenuItem(item[labelField], item) : item[labelField]}
                 </ListItem>
@@ -374,7 +375,9 @@ export default class ListBox extends React.Component {
                     <ListItemGroup
                         prefixCls={`${itemPrefixCls}-group`}
                         key={item[labelField]}
+                        value={item[valueField]}
                         onClick={this.onItemGroupClick}
+                        item={item}
                         label={renderMenuGroup ? renderMenuGroup(item[labelField], item) : item[labelField]}
                     >
                         {this.renderListItems(item[childrenField] || [], selectedMap)}
@@ -456,6 +459,10 @@ export default class ListBox extends React.Component {
         this._itemIndex = 0;
         this._indexValueMap = {};
         this._activeIndex = null;
+
+        if (!items.length && !React.Children.count(children)) {
+            return emptyLabel;
+        }
 
         const childs = items.length ?
             this.renderListItems(items, selectedMap) :
