@@ -38,6 +38,7 @@ export default class ListBox extends React.Component {
         tabIndex: PropTypes.number,
         enableDownUpSelect: PropTypes.bool,
         onItemClick: PropTypes.func,
+        onItemGroupClick: PropTypes.func,
         onChange: PropTypes.func,
         onFocus: PropTypes.func,
         onBlur: PropTypes.func,
@@ -156,9 +157,17 @@ export default class ListBox extends React.Component {
         if (e) {
             scrollIntoView(e.target, this.getListViewBody());
         }
-        //this.getListView().scrollIntoView(e.target);
 
         if (onItemClick) onItemClick(item);
+    }
+
+    onItemGroupClick = (item, e) => {
+        const { onItemGroupClick } = this.props;
+        if (e) {
+            scrollIntoView(e.target, this.getListViewBody());
+        }
+
+        if (onItemGroupClick) onItemGroupClick(item);
     }
 
     transformChangeValue(value) {
@@ -365,6 +374,7 @@ export default class ListBox extends React.Component {
                     <ListItemGroup
                         prefixCls={`${itemPrefixCls}-group`}
                         key={item[labelField]}
+                        onClick={this.onItemGroupClick}
                         label={renderMenuGroup ? renderMenuGroup(item[labelField], item) : item[labelField]}
                     >
                         {this.renderListItems(item[childrenField] || [], selectedMap)}
@@ -374,7 +384,7 @@ export default class ListBox extends React.Component {
     }
 
     renderListChild(children, selectedMap) {
-        const { labelField, valueField, childrenField, prefixCls, disabled } = this.props;
+        const { labelField, valueField, prefixCls, disabled } = this.props;
         const { itemsMap } = this.state;
 
         const itemPrefixCls = `${prefixCls}-item`;

@@ -1,7 +1,14 @@
 import React from 'react';
-//import PropTypes from 'prop-types';
+import PropTypes from 'prop-types';
 
 export default class ItemGroup extends React.Component {
+
+    static propTypes = {
+        label: PropTypes.node,
+        value: PropTypes.any,
+        children: PropTypes.node,
+        prefixCls: PropTypes.string,
+    }
 
     static defaultProps = {
         prefixCls: 'rw-listbox-item-group',
@@ -10,11 +17,29 @@ export default class ItemGroup extends React.Component {
 
     static isListItemGroup = true;
 
+    handleClick = (e) => {
+        const {
+            value,
+            label,
+            children
+        } = this.props;
+
+        if (onClick) {
+            onClick({
+                value, label, children
+            }, e);
+        }
+    }
+
     render() {
-        const { prefixCls, label, children } = this.props;
+        const { prefixCls, label, children, ...others } = this.props;
         return (
             <div className={prefixCls}>
-                <div className={`${prefixCls}-title`}>{label}</div>
+                <div
+                    {...others}
+                    className={`${prefixCls}-title`}
+                    onClick={this.handleClick}
+                >{label}</div>
                 <div className={`${prefixCls}-list`}>
                     {children}
                 </div>
