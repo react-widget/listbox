@@ -44,7 +44,7 @@ export default class ListBox extends React.Component {
         onBlur: PropTypes.func,
         onKeyDown: PropTypes.func,
         renderMenu: PropTypes.func,
-        renderMenuGroup: PropTypes.func,
+        renderMenuGroupTitle: PropTypes.func,
         renderMenuItem: PropTypes.func,
         renderHeader: PropTypes.func,
         renderFooter: PropTypes.func,
@@ -119,18 +119,9 @@ export default class ListBox extends React.Component {
         return {};
     }
 
-    // componentWillReceiveProps({ value }) {
-    //     if (!isUndefined(value)) {
-    //         this.setState({
-    //             selectedValue: isArray(value) ? copy(value) : [value]
-    //         });
-    //     }
-    // }
-
     componentDidMount() {
         const { prefixCls, autoFocus } = this.props;
         const el = findDOMNode(this);
-        //const scrollview = this.getListView();//this.refs.listbox;
         const selector = `.${prefixCls}-item-selected`;
 
         if (autoFocus) {
@@ -322,7 +313,7 @@ export default class ListBox extends React.Component {
     }
 
     renderListItems(items, selectedMap) {
-        const { labelField, valueField, childrenField, prefixCls, disabled, renderMenuItem, renderMenuGroup } = this.props;
+        const { labelField, valueField, childrenField, prefixCls, disabled, renderMenuItem, renderMenuGroupTitle } = this.props;
         const { itemsMap } = this.state;
 
         return items.map(item => {
@@ -378,7 +369,7 @@ export default class ListBox extends React.Component {
                         value={item[valueField]}
                         onClick={this.onItemGroupClick}
                         item={item}
-                        label={renderMenuGroup ? renderMenuGroup(item[labelField], item) : item[labelField]}
+                        label={renderMenuGroupTitle ? renderMenuGroupTitle(item[labelField], item) : item[labelField]}
                     >
                         {this.renderListItems(item[childrenField] || [], selectedMap)}
                     </ListItemGroup>
@@ -511,17 +502,17 @@ export default class ListBox extends React.Component {
             renderMenu,
         } = this.props;
 
-        const Menu = (
+        const Menus = this.renderList();
+
+        return (
             <BodyWrapperComponent
                 ref={this.saveListViewBody}
                 className={`${prefixCls}-body`}
                 style={bodyStyle}
             >
-                {this.renderList()}
+                {renderMenu ? renderMenu(Menus) : Menus}
             </BodyWrapperComponent>
         );
-
-        return renderMenu ? renderMenu(Menu) : Menu;
     }
 
     render() {

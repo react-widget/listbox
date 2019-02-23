@@ -390,6 +390,15 @@ function (_Component) {
         renderFooter: function renderFooter() {
           return _react.default.createElement("h3", null, "footer");
         },
+        renderMenu: function renderMenu(a) {
+          return a;
+        },
+        renderMenuItem: function renderMenuItem(a) {
+          return a + '-opt';
+        },
+        renderMenuGroupTitle: function renderMenuGroupTitle(a) {
+          return a + '-opt';
+        },
         headerStyle: {
           borderBottom: '1px solid #ccc'
         },
@@ -401,7 +410,10 @@ function (_Component) {
         items: dataset.filter(function (item, i) {
           return item.label.indexOf(_this2.filterMsg) >= 0;
         }),
-        emptyLabel: "\u65E0\u5339\u914D\u9879"
+        emptyLabel: "\u65E0\u5339\u914D\u9879",
+        onItemGroupClick: function onItemGroupClick(d) {
+          return console.log(d);
+        }
       }), _react.default.createElement(_src.default, {
         multiple: true,
         disabled: false,
@@ -438,7 +450,17 @@ function (_Component) {
         value: "X03"
       }, "X03"), _react.default.createElement(ListItem, {
         value: "X04"
-      }, "X04"))));
+      }, "X04"))), _react.default.createElement(_src.default, {
+        multiple: true,
+        disabled: false,
+        labelInValue: true,
+        onChange: this.handleChange2,
+        defaultValue: "V03",
+        style: {
+          maxWidth: 300,
+          height: 400
+        }
+      }));
     }
   }]);
   return DEMO;
@@ -575,10 +597,18 @@ function (_React$Component) {
 
       if (e) {
         (0, _scrollIntoView.default)(e.target, _this.getListViewBody());
-      } //this.getListView().scrollIntoView(e.target);
-
+      }
 
       if (onItemClick) onItemClick(item);
+    });
+    (0, _defineProperty2.default)((0, _assertThisInitialized2.default)((0, _assertThisInitialized2.default)(_this)), "onItemGroupClick", function (item, e) {
+      var onItemGroupClick = _this.props.onItemGroupClick;
+
+      if (e) {
+        (0, _scrollIntoView.default)(e.target, _this.getListViewBody());
+      }
+
+      if (onItemGroupClick) onItemGroupClick(item);
     });
     (0, _defineProperty2.default)((0, _assertThisInitialized2.default)((0, _assertThisInitialized2.default)(_this)), "onItemSelect", function (item, el) {
       var valueField = 'value';
@@ -734,19 +764,11 @@ function (_React$Component) {
 
   (0, _createClass2.default)(ListBox, [{
     key: "componentDidMount",
-    // componentWillReceiveProps({ value }) {
-    //     if (!isUndefined(value)) {
-    //         this.setState({
-    //             selectedValue: isArray(value) ? copy(value) : [value]
-    //         });
-    //     }
-    // }
     value: function componentDidMount() {
       var _this$props2 = this.props,
           prefixCls = _this$props2.prefixCls,
           autoFocus = _this$props2.autoFocus;
-      var el = (0, _reactDom.findDOMNode)(this); //const scrollview = this.getListView();//this.refs.listbox;
-
+      var el = (0, _reactDom.findDOMNode)(this);
       var selector = ".".concat(prefixCls, "-item-selected");
 
       if (autoFocus) {
@@ -828,7 +850,7 @@ function (_React$Component) {
           prefixCls = _this$props4.prefixCls,
           disabled = _this$props4.disabled,
           renderMenuItem = _this$props4.renderMenuItem,
-          renderMenuGroup = _this$props4.renderMenuGroup;
+          renderMenuGroupTitle = _this$props4.renderMenuGroupTitle;
       var itemsMap = this.state.itemsMap;
       return items.map(function (item) {
         if (typeof item === 'string' || typeof item === 'number') {
@@ -870,11 +892,15 @@ function (_React$Component) {
           onSelect: _this2.onItemSelect,
           onDeselect: _this2.onItemDeselect,
           onMouseEnter: onMouseEnter,
-          onMouseLeave: onMouseLeave
+          onMouseLeave: onMouseLeave,
+          item: item
         }, renderMenuItem ? renderMenuItem(item[labelField], item) : item[labelField]) : _react.default.createElement(_ListItemGroup.default, {
           prefixCls: "".concat(itemPrefixCls, "-group"),
           key: item[labelField],
-          label: renderMenuGroup ? renderMenuGroup(item[labelField], item) : item[labelField]
+          value: item[valueField],
+          onClick: _this2.onItemGroupClick,
+          item: item,
+          label: renderMenuGroupTitle ? renderMenuGroupTitle(item[labelField], item) : item[labelField]
         }, _this2.renderListItems(item[childrenField] || [], selectedMap));
       });
     }
@@ -886,7 +912,6 @@ function (_React$Component) {
       var _this$props5 = this.props,
           labelField = _this$props5.labelField,
           valueField = _this$props5.valueField,
-          childrenField = _this$props5.childrenField,
           prefixCls = _this$props5.prefixCls,
           disabled = _this$props5.disabled;
       var itemsMap = this.state.itemsMap;
@@ -957,6 +982,11 @@ function (_React$Component) {
       this._itemIndex = 0;
       this._indexValueMap = {};
       this._activeIndex = null;
+
+      if (!items.length && !_react.default.Children.count(children)) {
+        return emptyLabel;
+      }
+
       var childs = items.length ? this.renderListItems(items, selectedMap) : this.renderListChild(children, selectedMap);
       return _react.default.Children.count(childs) ? childs : emptyLabel;
     }
@@ -989,14 +1019,12 @@ function (_React$Component) {
           _this$props7$bodyStyl = _this$props7.bodyStyle,
           bodyStyle = _this$props7$bodyStyl === void 0 ? {} : _this$props7$bodyStyl,
           renderMenu = _this$props7.renderMenu;
-
-      var Menu = _react.default.createElement(BodyWrapperComponent, {
+      var Menus = this.renderList();
+      return _react.default.createElement(BodyWrapperComponent, {
         ref: this.saveListViewBody,
         className: "".concat(prefixCls, "-body"),
         style: bodyStyle
-      }, this.renderList());
-
-      return renderMenu ? renderMenu(Menu) : Menu;
+      }, renderMenu ? renderMenu(Menus) : Menus);
     }
   }, {
     key: "render",
@@ -1096,12 +1124,13 @@ exports.default = ListBox;
   tabIndex: _propTypes.default.number,
   enableDownUpSelect: _propTypes.default.bool,
   onItemClick: _propTypes.default.func,
+  onItemGroupClick: _propTypes.default.func,
   onChange: _propTypes.default.func,
   onFocus: _propTypes.default.func,
   onBlur: _propTypes.default.func,
   onKeyDown: _propTypes.default.func,
   renderMenu: _propTypes.default.func,
-  renderMenuGroup: _propTypes.default.func,
+  renderMenuGroupTitle: _propTypes.default.func,
   renderMenuItem: _propTypes.default.func,
   renderHeader: _propTypes.default.func,
   renderFooter: _propTypes.default.func,
@@ -1118,7 +1147,7 @@ exports.default = ListBox;
   labelInValue: false,
   tabIndex: 0,
   items: [],
-  emptyLabel: null,
+  emptyLabel: 'Not Found',
   enableDownUpSelect: true,
   onFocus: noop,
   onBlur: noop,
@@ -1201,21 +1230,22 @@ function (_React$Component) {
           selected = _this$props.selected,
           disabled = _this$props.disabled,
           value = _this$props.value,
-          children = _this$props.children;
+          children = _this$props.children,
+          item = _this$props.item;
       if (disabled) return;
-      var item = {
+      var newItem = item || {
         value: value,
         label: children
       };
 
       if (onClick) {
-        onClick(item, e);
+        onClick(newItem, e);
       }
 
       if (!selected) {
-        onSelect && onSelect(item, _this.refs.item);
+        onSelect && onSelect(newItem, _this.refs.item);
       } else {
-        onDeselect && onDeselect(item, _this.refs.item);
+        onDeselect && onDeselect(newItem, _this.refs.item);
       }
     });
     (0, _defineProperty2.default)((0, _assertThisInitialized2.default)((0, _assertThisInitialized2.default)(_this)), "saveItem", function (item) {
@@ -1260,7 +1290,8 @@ exports.default = ListItem;
   onDeselect: _propTypes.default.func,
   onClick: _propTypes.default.func,
   selected: _propTypes.default.bool,
-  disabled: _propTypes.default.bool
+  disabled: _propTypes.default.bool,
+  item: _propTypes.default.object
 });
 (0, _defineProperty2.default)(ListItem, "defaultProps", {
   prefixCls: 'rw-listbox-item',
@@ -1289,43 +1320,78 @@ Object.defineProperty(exports, "__esModule", {
 });
 exports.default = void 0;
 
+var _extends2 = _interopRequireDefault(__webpack_require__(/*! @babel/runtime-corejs2/helpers/extends */ "./node_modules/@babel/runtime-corejs2/helpers/extends.js"));
+
+var _objectWithoutProperties2 = _interopRequireDefault(__webpack_require__(/*! @babel/runtime-corejs2/helpers/objectWithoutProperties */ "./node_modules/@babel/runtime-corejs2/helpers/objectWithoutProperties.js"));
+
 var _classCallCheck2 = _interopRequireDefault(__webpack_require__(/*! @babel/runtime-corejs2/helpers/classCallCheck */ "./node_modules/@babel/runtime-corejs2/helpers/classCallCheck.js"));
 
 var _createClass2 = _interopRequireDefault(__webpack_require__(/*! @babel/runtime-corejs2/helpers/createClass */ "./node_modules/@babel/runtime-corejs2/helpers/createClass.js"));
 
 var _possibleConstructorReturn2 = _interopRequireDefault(__webpack_require__(/*! @babel/runtime-corejs2/helpers/possibleConstructorReturn */ "./node_modules/@babel/runtime-corejs2/helpers/possibleConstructorReturn.js"));
 
-var _getPrototypeOf2 = _interopRequireDefault(__webpack_require__(/*! @babel/runtime-corejs2/helpers/getPrototypeOf */ "./node_modules/@babel/runtime-corejs2/helpers/getPrototypeOf.js"));
+var _getPrototypeOf3 = _interopRequireDefault(__webpack_require__(/*! @babel/runtime-corejs2/helpers/getPrototypeOf */ "./node_modules/@babel/runtime-corejs2/helpers/getPrototypeOf.js"));
 
 var _inherits2 = _interopRequireDefault(__webpack_require__(/*! @babel/runtime-corejs2/helpers/inherits */ "./node_modules/@babel/runtime-corejs2/helpers/inherits.js"));
+
+var _assertThisInitialized2 = _interopRequireDefault(__webpack_require__(/*! @babel/runtime-corejs2/helpers/assertThisInitialized */ "./node_modules/@babel/runtime-corejs2/helpers/assertThisInitialized.js"));
 
 var _defineProperty2 = _interopRequireDefault(__webpack_require__(/*! @babel/runtime-corejs2/helpers/defineProperty */ "./node_modules/@babel/runtime-corejs2/helpers/defineProperty.js"));
 
 var _react = _interopRequireDefault(__webpack_require__(/*! react */ "./node_modules/react/index.js"));
 
-//import PropTypes from 'prop-types';
+var _propTypes = _interopRequireDefault(__webpack_require__(/*! prop-types */ "./node_modules/prop-types/index.js"));
+
 var ItemGroup =
 /*#__PURE__*/
 function (_React$Component) {
   (0, _inherits2.default)(ItemGroup, _React$Component);
 
   function ItemGroup() {
+    var _getPrototypeOf2;
+
+    var _this;
+
     (0, _classCallCheck2.default)(this, ItemGroup);
-    return (0, _possibleConstructorReturn2.default)(this, (0, _getPrototypeOf2.default)(ItemGroup).apply(this, arguments));
+
+    for (var _len = arguments.length, args = new Array(_len), _key = 0; _key < _len; _key++) {
+      args[_key] = arguments[_key];
+    }
+
+    _this = (0, _possibleConstructorReturn2.default)(this, (_getPrototypeOf2 = (0, _getPrototypeOf3.default)(ItemGroup)).call.apply(_getPrototypeOf2, [this].concat(args)));
+    (0, _defineProperty2.default)((0, _assertThisInitialized2.default)((0, _assertThisInitialized2.default)(_this)), "handleClick", function (e) {
+      var _this$props = _this.props,
+          value = _this$props.value,
+          label = _this$props.label,
+          children = _this$props.children,
+          onClick = _this$props.onClick,
+          item = _this$props.item;
+
+      if (onClick) {
+        onClick(item || {
+          value: value,
+          label: label,
+          children: children
+        }, e);
+      }
+    });
+    return _this;
   }
 
   (0, _createClass2.default)(ItemGroup, [{
     key: "render",
     value: function render() {
-      var _this$props = this.props,
-          prefixCls = _this$props.prefixCls,
-          label = _this$props.label,
-          children = _this$props.children;
+      var _this$props2 = this.props,
+          prefixCls = _this$props2.prefixCls,
+          label = _this$props2.label,
+          children = _this$props2.children,
+          others = (0, _objectWithoutProperties2.default)(_this$props2, ["prefixCls", "label", "children"]);
       return _react.default.createElement("div", {
         className: prefixCls
-      }, _react.default.createElement("div", {
-        className: "".concat(prefixCls, "-title")
-      }, label), _react.default.createElement("div", {
+      }, _react.default.createElement("div", (0, _extends2.default)({}, others, {
+        className: "".concat(prefixCls, "-title"),
+        onClick: this.handleClick
+      }), label), _react.default.createElement("div", {
         className: "".concat(prefixCls, "-list")
       }, children));
     }
@@ -1334,6 +1400,14 @@ function (_React$Component) {
 }(_react.default.Component);
 
 exports.default = ItemGroup;
+(0, _defineProperty2.default)(ItemGroup, "propTypes", {
+  label: _propTypes.default.node,
+  value: _propTypes.default.any,
+  children: _propTypes.default.node,
+  prefixCls: _propTypes.default.string,
+  onClick: _propTypes.default.func,
+  item: _propTypes.default.object
+});
 (0, _defineProperty2.default)(ItemGroup, "defaultProps", {
   prefixCls: 'rw-listbox-item-group',
   label: ''
@@ -1478,4 +1552,4 @@ module.exports = __webpack_require__(/*! D:\wamp\www\github-projects\react-widge
 /***/ })
 
 /******/ });
-//# sourceMappingURL=index.f0e21de0.js.map
+//# sourceMappingURL=index.ff6e5f2a.js.map
