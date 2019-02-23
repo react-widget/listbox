@@ -42,6 +42,9 @@ export default class ListBox extends React.Component {
         onFocus: PropTypes.func,
         onBlur: PropTypes.func,
         onKeyDown: PropTypes.func,
+        renderMenu: PropTypes.func,
+        renderMenuGroup: PropTypes.func,
+        renderMenuItem: PropTypes.func,
         renderHeader: PropTypes.func,
         renderFooter: PropTypes.func,
         wrapperComponent: PropTypes.node,
@@ -310,7 +313,7 @@ export default class ListBox extends React.Component {
     }
 
     renderListItems(items, selectedMap) {
-        const { labelField, valueField, childrenField, prefixCls, disabled } = this.props;
+        const { labelField, valueField, childrenField, prefixCls, disabled, renderMenuItem, renderMenuGroup } = this.props;
         const { itemsMap } = this.state;
 
         return items.map(item => {
@@ -356,13 +359,13 @@ export default class ListBox extends React.Component {
                     onMouseEnter={onMouseEnter}
                     onMouseLeave={onMouseLeave}
                 >
-                    {item[labelField]}
+                    {renderMenuItem ? renderMenuItem(item[labelField], item) : item[labelField]}
                 </ListItem>
             ) : (
                     <ListItemGroup
                         prefixCls={`${itemPrefixCls}-group`}
                         key={item[labelField]}
-                        label={item[labelField]}
+                        label={renderMenuGroup ? renderMenuGroup(item[labelField], item) : item[labelField]}
                     >
                         {this.renderListItems(item[childrenField] || [], selectedMap)}
                     </ListItemGroup>
@@ -483,6 +486,27 @@ export default class ListBox extends React.Component {
         return findDOMNode(this._listview_footer);
     }
 
+    renderMenu() {
+        const {
+            bodyWrapperComponent: BodyWrapperComponent,
+            prefixCls,
+            bodyStyle = {},
+            renderMenu,
+        } = this.props;
+
+        const Menu = (
+            <BodyWrapperComponent
+                ref={this.saveListViewBody}
+                className={`${prefixCls}-body`}
+                style={bodyStyle}
+            >
+                {this.renderList()}
+            </BodyWrapperComponent>
+        );
+
+        return renderMenu ? renderMenu(Menu) : Menu;
+    }
+
     render() {
         const {
             className,
@@ -498,10 +522,8 @@ export default class ListBox extends React.Component {
             onFocus,
             onBlur,
             style = {},
-            bodyStyle = {},
             wrapperComponent: WrapperComponent,
             headerWrapperComponent: HeaderWrapperComponent,
-            bodyWrapperComponent: BodyWrapperComponent,
             footerWrapperComponent: FooterWrapperComponent,
             renderHeader,
             renderFooter,
@@ -546,14 +568,7 @@ export default class ListBox extends React.Component {
                         </HeaderWrapperComponent> :
                         null
                 }
-
-                <BodyWrapperComponent
-                    ref={this.saveListViewBody}
-                    className={`${prefixCls}-body`}
-                    style={bodyStyle}
-                >
-                    {this.renderList()}
-                </BodyWrapperComponent>
+                {this.renderMenu()}
                 {
                     renderFooter ?
                         <FooterWrapperComponent

@@ -826,7 +826,9 @@ function (_React$Component) {
           valueField = _this$props4.valueField,
           childrenField = _this$props4.childrenField,
           prefixCls = _this$props4.prefixCls,
-          disabled = _this$props4.disabled;
+          disabled = _this$props4.disabled,
+          renderMenuItem = _this$props4.renderMenuItem,
+          renderMenuGroup = _this$props4.renderMenuGroup;
       var itemsMap = this.state.itemsMap;
       return items.map(function (item) {
         if (typeof item === 'string' || typeof item === 'number') {
@@ -869,10 +871,10 @@ function (_React$Component) {
           onDeselect: _this2.onItemDeselect,
           onMouseEnter: onMouseEnter,
           onMouseLeave: onMouseLeave
-        }, item[labelField]) : _react.default.createElement(_ListItemGroup.default, {
+        }, renderMenuItem ? renderMenuItem(item[labelField], item) : item[labelField]) : _react.default.createElement(_ListItemGroup.default, {
           prefixCls: "".concat(itemPrefixCls, "-group"),
           key: item[labelField],
-          label: item[labelField]
+          label: renderMenuGroup ? renderMenuGroup(item[labelField], item) : item[labelField]
         }, _this2.renderListItems(item[childrenField] || [], selectedMap));
       });
     }
@@ -979,37 +981,52 @@ function (_React$Component) {
       return (0, _reactDom.findDOMNode)(this._listview_footer);
     }
   }, {
+    key: "renderMenu",
+    value: function renderMenu() {
+      var _this$props7 = this.props,
+          BodyWrapperComponent = _this$props7.bodyWrapperComponent,
+          prefixCls = _this$props7.prefixCls,
+          _this$props7$bodyStyl = _this$props7.bodyStyle,
+          bodyStyle = _this$props7$bodyStyl === void 0 ? {} : _this$props7$bodyStyl,
+          renderMenu = _this$props7.renderMenu;
+
+      var Menu = _react.default.createElement(BodyWrapperComponent, {
+        ref: this.saveListViewBody,
+        className: "".concat(prefixCls, "-body"),
+        style: bodyStyle
+      }, this.renderList());
+
+      return renderMenu ? renderMenu(Menu) : Menu;
+    }
+  }, {
     key: "render",
     value: function render() {
       var _classNames;
 
-      var _this$props7 = this.props,
-          className = _this$props7.className,
-          value = _this$props7.value,
-          prefixCls = _this$props7.prefixCls,
-          items = _this$props7.items,
-          width = _this$props7.width,
-          height = _this$props7.height,
-          tabIndex = _this$props7.tabIndex,
-          disabled = _this$props7.disabled,
-          enableDownUpSelect = _this$props7.enableDownUpSelect,
-          onKeyDown = _this$props7.onKeyDown,
-          onFocus = _this$props7.onFocus,
-          onBlur = _this$props7.onBlur,
-          _this$props7$style = _this$props7.style,
-          style = _this$props7$style === void 0 ? {} : _this$props7$style,
-          _this$props7$bodyStyl = _this$props7.bodyStyle,
-          bodyStyle = _this$props7$bodyStyl === void 0 ? {} : _this$props7$bodyStyl,
-          WrapperComponent = _this$props7.wrapperComponent,
-          HeaderWrapperComponent = _this$props7.headerWrapperComponent,
-          BodyWrapperComponent = _this$props7.bodyWrapperComponent,
-          FooterWrapperComponent = _this$props7.footerWrapperComponent,
-          renderHeader = _this$props7.renderHeader,
-          renderFooter = _this$props7.renderFooter,
-          _this$props7$headerSt = _this$props7.headerStyle,
-          headerStyle = _this$props7$headerSt === void 0 ? {} : _this$props7$headerSt,
-          _this$props7$footerSt = _this$props7.footerStyle,
-          footerStyle = _this$props7$footerSt === void 0 ? {} : _this$props7$footerSt;
+      var _this$props8 = this.props,
+          className = _this$props8.className,
+          value = _this$props8.value,
+          prefixCls = _this$props8.prefixCls,
+          items = _this$props8.items,
+          width = _this$props8.width,
+          height = _this$props8.height,
+          tabIndex = _this$props8.tabIndex,
+          disabled = _this$props8.disabled,
+          enableDownUpSelect = _this$props8.enableDownUpSelect,
+          onKeyDown = _this$props8.onKeyDown,
+          onFocus = _this$props8.onFocus,
+          onBlur = _this$props8.onBlur,
+          _this$props8$style = _this$props8.style,
+          style = _this$props8$style === void 0 ? {} : _this$props8$style,
+          WrapperComponent = _this$props8.wrapperComponent,
+          HeaderWrapperComponent = _this$props8.headerWrapperComponent,
+          FooterWrapperComponent = _this$props8.footerWrapperComponent,
+          renderHeader = _this$props8.renderHeader,
+          renderFooter = _this$props8.renderFooter,
+          _this$props8$headerSt = _this$props8.headerStyle,
+          headerStyle = _this$props8$headerSt === void 0 ? {} : _this$props8$headerSt,
+          _this$props8$footerSt = _this$props8.footerStyle,
+          footerStyle = _this$props8$footerSt === void 0 ? {} : _this$props8$footerSt;
 
       if (width) {
         style.width = width;
@@ -1034,11 +1051,7 @@ function (_React$Component) {
         ref: this.saveListViewHeader,
         className: "".concat(prefixCls, "-header"),
         style: headerStyle
-      }, renderHeader()) : null, _react.default.createElement(BodyWrapperComponent, {
-        ref: this.saveListViewBody,
-        className: "".concat(prefixCls, "-body"),
-        style: bodyStyle
-      }, this.renderList()), renderFooter ? _react.default.createElement(FooterWrapperComponent, {
+      }, renderHeader()) : null, this.renderMenu(), renderFooter ? _react.default.createElement(FooterWrapperComponent, {
         ref: this.saveListViewFooter,
         className: "".concat(prefixCls, "-footer"),
         style: footerStyle
@@ -1087,6 +1100,9 @@ exports.default = ListBox;
   onFocus: _propTypes.default.func,
   onBlur: _propTypes.default.func,
   onKeyDown: _propTypes.default.func,
+  renderMenu: _propTypes.default.func,
+  renderMenuGroup: _propTypes.default.func,
+  renderMenuItem: _propTypes.default.func,
   renderHeader: _propTypes.default.func,
   renderFooter: _propTypes.default.func,
   wrapperComponent: _propTypes.default.node,
@@ -1462,4 +1478,4 @@ module.exports = __webpack_require__(/*! D:\wamp\www\github-projects\react-widge
 /***/ })
 
 /******/ });
-//# sourceMappingURL=index.dcbccb8c.js.map
+//# sourceMappingURL=index.f0e21de0.js.map
