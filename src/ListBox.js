@@ -510,7 +510,7 @@ export default class ListBox extends React.Component {
                 className={`${prefixCls}-body`}
                 style={bodyStyle}
             >
-                {renderMenu ? renderMenu(Menus) : Menus}
+                {renderMenu ? renderMenu(Menus, this.props) : Menus}
             </BodyWrapperComponent>
         );
     }
