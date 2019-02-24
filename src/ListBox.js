@@ -61,7 +61,6 @@ export default class ListBox extends React.Component {
         childrenField: 'children',
         labelInValue: false,
         tabIndex: 0,
-        items: [],
         emptyLabel: 'Not Found',
         enableDownUpSelect: true,
         onFocus: noop,
@@ -455,7 +454,7 @@ export default class ListBox extends React.Component {
             return emptyLabel;
         }
 
-        const childs = items.length ?
+        const childs = Array.isArray(items) ?
             this.renderListItems(items, selectedMap) :
             this.renderListChild(children, selectedMap);
 
