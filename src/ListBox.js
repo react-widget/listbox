@@ -28,7 +28,7 @@ export default class ListBox extends React.Component {
         labelField: PropTypes.string,
         childrenField: PropTypes.string,
         items: PropTypes.array,
-        itemsMap: PropTypes.object,
+        //itemsMap: PropTypes.object,
         defaultValue: PropTypes.oneOfType([PropTypes.string, PropTypes.number, PropTypes.array]),
         value: PropTypes.oneOfType([PropTypes.string, PropTypes.number, PropTypes.array]),
         emptyLabel: PropTypes.any,
