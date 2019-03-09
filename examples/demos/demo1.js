@@ -20,7 +20,7 @@ for (let i = 0; i < 10; i++) {
         let d = {
             value: uuid++,
             label: '选项' + (j + 1),
-            disabled: j % 2
+            disabled: !(j % 5)
         }
         items.push(d)
     }
@@ -77,39 +77,23 @@ export default class DEMO extends Component {
                 />
 
                 <ListBox
+                    items={dataset}
                     multiple
                     disabled={false}
                     labelInValue
                     onChange={this.handleChange2}
-                    defaultValue="V03"
                     style={{
                         maxWidth: 300,
                         height: 400,
                     }}
                 >
-                    <ListItemGroup label="V">
-                        <ListItem value="V01">V01<span style={{
-                            position: 'absolute',
-                            right: 10,
-                            top: 0,
-                        }}><strong>Hot</strong></span></ListItem>
-                        <ListItem value="V02">V02</ListItem>
-                        <ListItem value="V03">V03</ListItem>
-                        <ListItem value="V04">V04</ListItem>
-                    </ListItemGroup>
-                    <ListItemGroup label="X">
-                        <ListItem value="X01">X01</ListItem>
-                        <ListItem value="X02">X02</ListItem>
-                        <ListItem value="X03">X03</ListItem>
-                        <ListItem value="X04">X04</ListItem>
-                    </ListItemGroup>
                 </ListBox>
                 <ListBox
                     multiple
                     disabled={false}
                     labelInValue
                     onChange={this.handleChange2}
-                    defaultValue="V03"
+                    items={dataset}
                     style={{
                         maxWidth: 300,
                         height: 400,

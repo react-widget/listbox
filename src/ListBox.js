@@ -2,7 +2,6 @@ import React from 'react';
 import { findDOMNode } from 'react-dom';
 import PropTypes from 'prop-types';
 import classNames from 'classnames';
-import omit from 'object.omit';
 import isIE from 'bplokjs-utils/isIE';
 import ListItem from './ListItem';
 import ListItemGroup from './ListItemGroup';
@@ -155,7 +154,6 @@ export default class ListBox extends React.Component {
         const selectedItem = el.querySelector(selector);
         if (selectedItem) {
             scrollIntoView(selectedItem, this.getListViewBody());
-            //scrollview.scrollIntoView(selectedItem);
         }
     }
 
@@ -334,12 +332,6 @@ export default class ListBox extends React.Component {
         const { labelField, valueField, childrenField, prefixCls, disabled, renderMenuItem, renderMenuGroupTitle } = this.props;
 
         return items.map(item => {
-            // if (typeof item === 'string' || typeof item === 'number') {
-            //     item = {
-            //         [labelField]: item,
-            //         [valueField]: item,
-            //     }
-            // }
 
             const isGroup = item[childrenField];
             const itemPrefixCls = `${prefixCls}-item`;
@@ -448,6 +440,8 @@ export default class ListBox extends React.Component {
         const footer = this.getListViewFooter();
         const body = this.getListViewBody();
 
+        body.style.maxHeight = '';
+
         const hasScroll = dom.scrollHeight > dom.clientHeight;
 
         const headerHeight = header ? header.offsetHeight : 0;
@@ -455,8 +449,6 @@ export default class ListBox extends React.Component {
 
         if (hasScroll) {
             body.style.maxHeight = (dom.clientHeight - headerHeight - footerHeight) + 'px';
-        } else {
-            body.style.maxHeight = '';
         }
     }
 
