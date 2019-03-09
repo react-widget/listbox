@@ -56,7 +56,6 @@ export default class DEMO extends Component {
                     style={{
                         maxWidth: 300,
                         maxHeight: 400,
-                        height: 400,
                     }}
                     autoFocus
                     renderHeader={() => <h3>header</h3>}

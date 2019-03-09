@@ -985,7 +985,7 @@ function (_React$Component) {
       this._indexValueMap = {};
       this._activeIndex = null;
 
-      if (!items.length && !_react.default.Children.count(children)) {
+      if (items && !items.length && !_react.default.Children.count(children)) {
         return emptyLabel;
       }
 
@@ -1557,4 +1557,4 @@ module.exports = __webpack_require__(/*! D:\wamp\www\github-projects\react-widge
 /***/ })
 
 /******/ });
-//# sourceMappingURL=index.46b94f42.js.map
+//# sourceMappingURL=index.4b464d14.js.map

@@ -454,7 +454,7 @@ export default class ListBox extends React.Component {
         this._indexValueMap = {};
         this._activeIndex = null;
 
-        if (!items.length && !React.Children.count(children)) {
+        if (items && !items.length && !React.Children.count(children)) {
             return emptyLabel;
         }
 
