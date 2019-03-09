@@ -1,6 +1,6 @@
 {
     "name": "react-widget-listbox",
-    "version": "1.0.7",
+    "version": "1.0.8",
     "description": "",
     "main": "index.js",
     "repository": {
@@ -33,6 +33,7 @@
         "@babel/runtime": "^7.1.5",
         "@babel/runtime-corejs2": "^7.1.5",
         "bplokjs-dom-utils": "^1.0.7",
+        "bplokjs-utils": "0.0.1",
         "classnames": "^2.2.6",
         "install": "^0.12.2",
         "npm": "^6.4.1",

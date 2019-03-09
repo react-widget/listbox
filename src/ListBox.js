@@ -3,6 +3,7 @@ import { findDOMNode } from 'react-dom';
 import PropTypes from 'prop-types';
 import classNames from 'classnames';
 import omit from 'object.omit';
+import isIE from 'bplokjs-utils/isIE';
 import ListItem from './ListItem';
 import ListItemGroup from './ListItemGroup';
 import { isArray, isUndefined, isEqual, each } from './util';
@@ -40,6 +41,7 @@ export default class ListBox extends React.Component {
         labelInValue: PropTypes.bool,
         tabIndex: PropTypes.number,
         enableDownUpSelect: PropTypes.bool,
+        fixListBodyHeightOnIE: PropTypes.bool,
         onItemClick: PropTypes.func,
         onItemGroupClick: PropTypes.func,
         onChange: PropTypes.func,
@@ -66,6 +68,7 @@ export default class ListBox extends React.Component {
         tabIndex: 0,
         emptyLabel: 'Not Found',
         enableDownUpSelect: true,
+        fixListBodyHeightOnIE: true,
         //items: [],
         onFocus: noop,
         onBlur: noop,
@@ -495,6 +498,38 @@ export default class ListBox extends React.Component {
 
     getListViewFooter() {
         return findDOMNode(this._listview_footer);
+    }
+    //修正IE对flex支持不够完善
+    resizeListBoxBodyHeight() {
+        const dom = this.getListView();
+        const header = this.getListViewHeader();
+        const footer = this.getListViewFooter();
+        const body = this.getListViewBody();
+
+        const hasScroll = dom.scrollHeight > dom.clientHeight;
+
+        const headerHeight = header ? header.offsetHeight : 0;
+        const footerHeight = footer ? footer.offsetHeight : 0;
+
+        if (hasScroll) {
+            body.style.maxHeight = (dom.clientHeight - headerHeight - footerHeight) + 'px';
+        } else {
+            body.style.maxHeight = '';
+        }
+    }
+
+    componentDidMount() {
+        const fixListBodyHeightOnIE = this.props.fixListBodyHeightOnIE;
+        if (isIE() && fixListBodyHeightOnIE) {
+            this.resizeListBoxBodyHeight();
+        }
+    }
+
+    componentDidUpdate() {
+        const fixListBodyHeightOnIE = this.props.fixListBodyHeightOnIE;
+        if (isIE() && fixListBodyHeightOnIE) {
+            this.resizeListBoxBodyHeight();
+        }
     }
 
     renderMenu() {
