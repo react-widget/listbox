@@ -5,7 +5,6 @@ export default class ItemGroup extends React.Component {
 
     static propTypes = {
         label: PropTypes.node,
-        value: PropTypes.any,
         children: PropTypes.node,
         prefixCls: PropTypes.string,
         onClick: PropTypes.func,
@@ -21,26 +20,20 @@ export default class ItemGroup extends React.Component {
 
     handleClick = (e) => {
         const {
-            value,
-            label,
-            children,
             onClick,
             item
         } = this.props;
 
         if (onClick) {
-            onClick(item || {
-                value, label, children
-            }, e);
+            onClick(item, e);
         }
     }
 
     render() {
-        const { prefixCls, label, children, ...others } = this.props;
+        const { prefixCls, label, children } = this.props;
         return (
             <div className={prefixCls}>
                 <div
-                    {...others}
                     className={`${prefixCls}-title`}
                     onClick={this.handleClick}
                 >{label}</div>

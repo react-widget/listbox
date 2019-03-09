@@ -16,6 +16,25 @@ function copy(data) {
     return isArray(data) ? [].concat(data) : data;
 }
 
+function getItemsMap(props) {
+    const { items, valueField, childrenField } = props;
+    const maps = {};
+
+    function toMaps(items) {
+        items.forEach(item => {
+            if (item[childrenField] && Array.isArray(item[childrenField])) {
+                toMaps(item[childrenField]);
+            } else {
+                maps[item[valueField]] = item;
+            }
+        });
+    }
+
+    toMaps(items);
+
+    return maps;
+}
+
 export default class ListBox extends React.Component {
 
     static propTypes = {
@@ -29,7 +48,7 @@ export default class ListBox extends React.Component {
         labelField: PropTypes.string,
         childrenField: PropTypes.string,
         items: PropTypes.array,
-        //itemsMap: PropTypes.object,
+        itemsMap: PropTypes.object,
         defaultValue: PropTypes.oneOfType([PropTypes.string, PropTypes.number, PropTypes.array]),
         value: PropTypes.oneOfType([PropTypes.string, PropTypes.number, PropTypes.array]),
         emptyLabel: PropTypes.any,
@@ -69,7 +88,8 @@ export default class ListBox extends React.Component {
         emptyLabel: 'Not Found',
         enableDownUpSelect: true,
         fixListBodyHeightOnIE: true,
-        //items: [],
+        items: [],
+        itemsMap: null,
         onFocus: noop,
         onBlur: noop,
         onKeyDown: noop,
@@ -85,12 +105,6 @@ export default class ListBox extends React.Component {
         const selectedValue = [];
         let value;
 
-        // if (!isUndefined(props.value)) {
-        //     value = isArray(props.value) ? props.value : [props.value];
-        // } else if (!isUndefined(props.defaultValue)) {
-        //     value = isArray(props.defaultValue) ? props.defaultValue : [props.defaultValue];
-        // }
-
         if (!isUndefined(props.defaultValue)) {
             value = isArray(props.defaultValue) ? props.defaultValue : [props.defaultValue];
         }
@@ -105,24 +119,28 @@ export default class ListBox extends React.Component {
         this._indexValueMap = {};
         this._activeIndex = null;
 
-
         this.state = {
-            selectedValue,
-            //items的value=>item对应表
-            itemsMap: {}
+            selectedValue
         };
     }
 
     static getDerivedStateFromProps(nextProps, prevState) {
         const value = nextProps.value;
+        let itemsMap = nextProps.itemsMap || {};
 
-        if (!isUndefined(value)) {
-            return {
-                selectedValue: isArray(value) ? copy(value) : [value]
-            };
+        if (!nextProps.itemsMap) {
+            itemsMap = getItemsMap(nextProps);
         }
 
-        return {};
+        const newState = {
+            itemsMap
+        };
+
+        if (!isUndefined(value)) {
+            newState.selectedValue = isArray(value) ? copy(value) : [value];
+        }
+
+        return newState;
     }
 
     componentDidMount() {
@@ -182,14 +200,13 @@ export default class ListBox extends React.Component {
 
     setValue(value) {
         const { multiple, onChange } = this.props;
-        const { selectedValue, itemsMap } = this.state;
+        const { selectedValue } = this.state;
 
         if (!multiple) {
             selectedValue.length = 0;
         }
 
         selectedValue.push(value);
-
         if (!('value' in this.props)) {
             this.setState({
                 selectedValue
@@ -209,14 +226,13 @@ export default class ListBox extends React.Component {
     }
 
     onItemSelect = (item, el) => {
-        const valueField = 'value';
+        const { valueField } = this.props;
         this.setValue(item[valueField]);
     }
 
     onItemDeselect = (item, el) => {
-        const { multiple, onChange, labelInValue } = this.props;
+        const { multiple, onChange, labelInValue, valueField } = this.props;
         const { selectedValue } = this.state;
-        const valueField = 'value';
 
         if (!multiple) return;
 
@@ -304,31 +320,26 @@ export default class ListBox extends React.Component {
 
             this._activeIndex = list[idx].getAttribute('data-index');
             scrollIntoView(list[idx], this.getListViewBody());
-            //scrollview.scrollIntoView(list[idx]);
         } else if (ENTER && activeIndex !== null) {
             const value = indexValueMap[activeIndex];
-            const item = state.itemsMap[value] || {};
+            const item = state.itemsMap[value];
             this.setValue(value);
             //触发onItemClick
-            this.onItemClick({
-                value,
-                label: item[props.labelField]
-            });
+            this.onItemClick(item);
         }
 
     }
 
     renderListItems(items, selectedMap) {
         const { labelField, valueField, childrenField, prefixCls, disabled, renderMenuItem, renderMenuGroupTitle } = this.props;
-        const { itemsMap } = this.state;
 
         return items.map(item => {
-            if (typeof item === 'string' || typeof item === 'number') {
-                item = {
-                    [labelField]: item,
-                    [valueField]: item,
-                }
-            }
+            // if (typeof item === 'string' || typeof item === 'number') {
+            //     item = {
+            //         [labelField]: item,
+            //         [valueField]: item,
+            //     }
+            // }
 
             const isGroup = item[childrenField];
             const itemPrefixCls = `${prefixCls}-item`;
@@ -338,7 +349,6 @@ export default class ListBox extends React.Component {
             let itemIndex = this._itemIndex++;
 
             if (!isGroup) {
-                itemsMap[item[valueField]] = item;
                 this._indexValueMap[itemIndex] = item[valueField];
 
                 if (!disabled && !item.disabled) {
@@ -354,7 +364,6 @@ export default class ListBox extends React.Component {
             return !isGroup ? (
                 <ListItem
                     key={item[valueField]}
-                    value={item[valueField]}
                     prefixCls={itemPrefixCls}
                     selected={selectedMap[item[valueField]]}
                     disabled={disabled || !!item.disabled}
@@ -383,72 +392,9 @@ export default class ListBox extends React.Component {
         });
     }
 
-    renderListChild(children, selectedMap) {
-        const { labelField, valueField, prefixCls, disabled } = this.props;
-        const { itemsMap } = this.state;
-
-        const itemPrefixCls = `${prefixCls}-item`;
-        const activeCls = `${prefixCls}-item-active`;
-
-        return React.Children.map(children, child => {
-            const props = child.props;
-
-            if (child.type.isListItemGroup) {
-                return React.cloneElement(
-                    child,
-                    {
-                        prefixCls: `${itemPrefixCls}-group`
-                    },
-                    this.renderListChild(props.children, selectedMap)
-                );
-            }
-
-            let onMouseEnter = noop;
-            let onMouseLeave = noop;
-            let itemIndex = this._itemIndex++;
-
-            itemsMap[props[valueField]] = Object.assign(
-                {},
-                omit(props, ['children', 'selected', 'prefixCls']),
-                { [labelField]: props.children }
-            );
-            this._indexValueMap[itemIndex] = props[valueField];
-
-            if (!props.disabled && !disabled) {
-                onMouseEnter = e => {
-                    addClass(e.currentTarget, activeCls);
-                    if (props.onMouseEnter) props.onMouseEnter(e);
-                }
-                onMouseLeave = e => {
-                    removeClass(e.currentTarget, activeCls);
-                    if (props.onMouseLeave) props.onMouseLeave(e);
-                }
-            }
-
-            const newProps = {
-                selected: selectedMap[props[valueField]],
-                prefixCls: itemPrefixCls,
-                'data-index': itemIndex,
-                onClick: this.onItemClick,
-                onSelect: this.onItemSelect,
-                onDeselect: this.onItemDeselect,
-                onMouseEnter,
-                onMouseLeave,
-            };
-
-            if (disabled) {
-                newProps.disabled = true;
-            }
-
-            return React.cloneElement(child, newProps);
-        });
-    }
-
     renderList() {
-        const { labelField, valueField, prefixCls, multiple, items, emptyLabel, children } = this.props;
+        const { items, emptyLabel } = this.props;
         const { selectedValue } = this.state;
-
-        this.state.itemsMap = {};
 
         const selectedMap = {};
         selectedValue.forEach(v => selectedMap[v] = true);
@@ -457,15 +403,11 @@ export default class ListBox extends React.Component {
         this._indexValueMap = {};
         this._activeIndex = null;
 
-        if (items && !items.length && !React.Children.count(children)) {
+        if (items && !items.length) {
             return emptyLabel;
         }
 
-        const childs = Array.isArray(items) ?
-            this.renderListItems(items, selectedMap) :
-            this.renderListChild(children, selectedMap);
-
-        return React.Children.count(childs) ? childs : emptyLabel;
+        return this.renderListItems(items, selectedMap);
     }
 
     saveListView = (node) => {

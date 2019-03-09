@@ -2,16 +2,16 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import classNames from 'classnames';
 import shallowEqual from 'shallowequal';
-import omit from 'object.omit';
 
 export default class ListItem extends React.Component {
 
     static propTypes = {
         prefixCls: PropTypes.string,
-        value: PropTypes.any,
         onSelect: PropTypes.func,
         onDeselect: PropTypes.func,
         onClick: PropTypes.func,
+        onMouseEnter: PropTypes.func,
+        onMouseLeave: PropTypes.func,
         selected: PropTypes.bool,
         disabled: PropTypes.bool,
         item: PropTypes.object,
@@ -19,57 +19,55 @@ export default class ListItem extends React.Component {
 
     static defaultProps = {
         prefixCls: 'rw-listbox-item',
-        value: '',
         selected: false,
         disabled: false,
     }
 
     static isListItem = true;
 
-    shouldComponentUpdate(nextProps, nextState, nextContext) {
+    shouldComponentUpdate(nextProps, nextState) {
         return !shallowEqual(this.props, nextProps) ||
             !shallowEqual(this.state, nextState);
     }
 
     handleItemClick = (e) => {
-        const { onSelect, onDeselect, onClick, selected, disabled, value, children, item } = this.props;
+        const { onSelect, onDeselect, onClick, selected, disabled, item } = this.props;
+        const itemDOM = this.getItemDOM();
         if (disabled) return;
 
-        const newItem = item || {
-            value,
-            label: children
-        };
-
         if (onClick) {
-            onClick(newItem, e);
+            onClick(item, e);
         }
 
         if (!selected) {
-            onSelect && onSelect(newItem, this.refs.item)
+            onSelect && onSelect(item, itemDOM)
         } else {
-            onDeselect && onDeselect(newItem, this.refs.item)
+            onDeselect && onDeselect(item, itemDOM)
         }
     }
 
-    saveItem = (item) => {
-        this.node = item;
+    saveItem = (dom) => {
+        this.node = dom;
+    }
+
+    getItemDOM() {
+        return this.node;
     }
 
     render() {
-        const { prefixCls, disabled, selected, active, children } = this.props;
+        const { prefixCls, disabled, selected, children, onMouseEnter, onMouseLeave } = this.props;
         const classes = classNames({
             [`${prefixCls}`]: true,
             [`${prefixCls}-selected`]: selected,
             [`${prefixCls}-disabled`]: disabled,
         });
 
-        const others = omit(this.props, Object.keys(ListItem.propTypes));
-
         return <div
-            {...others}
             ref={this.saveItem}
             className={classes}
             onClick={this.handleItemClick}
+            onMouseEnter={onMouseEnter}
+            onMouseLeave={onMouseLeave}
         >
             {children}
         </div>;
