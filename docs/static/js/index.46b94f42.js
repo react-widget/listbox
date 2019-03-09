@@ -538,6 +538,8 @@ Object.defineProperty(exports, "__esModule", {
 });
 exports.default = void 0;
 
+var _isArray = _interopRequireDefault(__webpack_require__(/*! @babel/runtime-corejs2/core-js/array/is-array */ "./node_modules/@babel/runtime-corejs2/core-js/array/is-array.js"));
+
 var _assign = _interopRequireDefault(__webpack_require__(/*! @babel/runtime-corejs2/core-js/object/assign */ "./node_modules/@babel/runtime-corejs2/core-js/object/assign.js"));
 
 var _toConsumableArray2 = _interopRequireDefault(__webpack_require__(/*! @babel/runtime-corejs2/helpers/toConsumableArray */ "./node_modules/@babel/runtime-corejs2/helpers/toConsumableArray.js"));
@@ -987,7 +989,7 @@ function (_React$Component) {
         return emptyLabel;
       }
 
-      var childs = items.length ? this.renderListItems(items, selectedMap) : this.renderListChild(children, selectedMap);
+      var childs = (0, _isArray.default)(items) ? this.renderListItems(items, selectedMap) : this.renderListChild(children, selectedMap);
       return _react.default.Children.count(childs) ? childs : emptyLabel;
     }
   }, {
@@ -1024,7 +1026,7 @@ function (_React$Component) {
         ref: this.saveListViewBody,
         className: "".concat(prefixCls, "-body"),
         style: bodyStyle
-      }, renderMenu ? renderMenu(Menus) : Menus);
+      }, renderMenu ? renderMenu(Menus, this.props) : Menus);
     }
   }, {
     key: "render",
@@ -1114,6 +1116,9 @@ exports.default = ListBox;
   labelField: _propTypes.default.string,
   childrenField: _propTypes.default.string,
   items: _propTypes.default.array,
+  //itemsMap: PropTypes.object,
+  defaultValue: _propTypes.default.oneOfType([_propTypes.default.string, _propTypes.default.number, _propTypes.default.array]),
+  value: _propTypes.default.oneOfType([_propTypes.default.string, _propTypes.default.number, _propTypes.default.array]),
   emptyLabel: _propTypes.default.any,
   multiple: _propTypes.default.bool,
   disabled: _propTypes.default.bool,
@@ -1146,9 +1151,9 @@ exports.default = ListBox;
   childrenField: 'children',
   labelInValue: false,
   tabIndex: 0,
-  items: [],
   emptyLabel: 'Not Found',
   enableDownUpSelect: true,
+  //items: [],
   onFocus: noop,
   onBlur: noop,
   onKeyDown: noop,
@@ -1552,4 +1557,4 @@ module.exports = __webpack_require__(/*! D:\wamp\www\github-projects\react-widge
 /***/ })
 
 /******/ });
-//# sourceMappingURL=index.ff6e5f2a.js.map
+//# sourceMappingURL=index.46b94f42.js.map

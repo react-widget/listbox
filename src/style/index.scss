@@ -3,65 +3,63 @@ $listboxItemPadding: 8px 12px !default;
 $listboxItemHeight: auto !default;
 
 .#{$prefixCls} {
-	background:#FFF;
-	overflow: hidden;
-	box-sizing: border-box;
-    border:1px solid #e5e5ea;
+    background: #fff;
+    overflow: hidden;
+    box-sizing: border-box;
+    border: 1px solid #e5e5ea;
     display: flex;
     flex-direction: column;
-	&:focus{
-		outline:0;	
-	}
-	&-disabled {
-		border:1px solid #b3b3b3;
-	}
-	.#{$prefixCls}-body {
-        flex: 1;
+    &:focus {
+        outline: 0;
+    }
+    &-disabled {
+        border: 1px solid #b3b3b3;
+    }
+    .#{$prefixCls}-body {
+        flex: auto;
         overflow: hidden;
         overflow-y: auto;
 
-		.#{$prefixCls}-item-group-title,
-		.#{$prefixCls}-item {
-			//list-style:none;
-			position:relative;
-			padding:$listboxItemPadding;
-			cursor: pointer;
-			line-height:$listboxItemHeight;
-			height:$listboxItemHeight;
-			white-space: nowrap;
-			overflow:hidden;
-		}
-		
-		//hover
-		.#{$prefixCls}-item-active {
-            background: rgba(235,249,255,.5);
-         //   color: #575757;
-		}
-		
-		.#{$prefixCls}-item-selected {
+        .#{$prefixCls}-item-group-title,
+        .#{$prefixCls}-item {
+            //list-style:none;
+            position: relative;
+            padding: $listboxItemPadding;
+            cursor: pointer;
+            line-height: $listboxItemHeight;
+            height: $listboxItemHeight;
+            white-space: nowrap;
+            overflow: hidden;
+        }
+
+        //hover
+        .#{$prefixCls}-item-active {
+            background: rgba(235, 249, 255, 0.5);
+            //   color: #575757;
+        }
+
+        .#{$prefixCls}-item-selected {
             background: #ebf9ff;
-            
-		}
-		
-		.#{$prefixCls}-item-disabled {
-			opacity: .5;
-			cursor: default;
-			&:not(.#{$prefixCls}-item-selected):hover {
-				background: none;
-				//color: rgba(0,0,0,.25);
-			}	
-		}
-		
-		.#{$prefixCls}-item-group-title {
-			padding:$listboxItemPadding;
-            cursor:default;
+        }
+
+        .#{$prefixCls}-item-disabled {
+            opacity: 0.5;
+            cursor: default;
+            &:not(.#{$prefixCls}-item-selected):hover {
+                background: none;
+                //color: rgba(0,0,0,.25);
+            }
+        }
+
+        .#{$prefixCls}-item-group-title {
+            padding: $listboxItemPadding;
+            cursor: default;
             font-weight: 700;
-			//color: #999;
-		}
-		
-		.#{$prefixCls}-item-group-list .#{$prefixCls}-item {
-			padding-left:28px;	
-		}
-	
-	}
-}	
+            //color: #999;
+        }
+
+        .#{$prefixCls}-item-group-list .#{$prefixCls}-item {
+            padding-left: 28px;
+        }
+    }
+}

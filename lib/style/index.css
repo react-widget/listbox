@@ -1,6 +1,6 @@
 
 .rw-listbox {
-  background: #FFF;
+  background: #fff;
   overflow: hidden;
   -webkit-box-sizing: border-box;
           box-sizing: border-box;
@@ -14,8 +14,8 @@
   .rw-listbox-disabled {
     border: 1px solid #b3b3b3; }
   .rw-listbox .rw-listbox-body {
-    -ms-flex: 1 1;
-        flex: 1 1;
+    -ms-flex: auto;
+        flex: auto;
     overflow: hidden;
     overflow-y: auto; }
     .rw-listbox .rw-listbox-body .rw-listbox-item-group-title,
@@ -32,7 +32,7 @@
     .rw-listbox .rw-listbox-body .rw-listbox-item-selected {
       background: #ebf9ff; }
     .rw-listbox .rw-listbox-body .rw-listbox-item-disabled {
-      opacity: .5;
+      opacity: 0.5;
       cursor: default; }
       .rw-listbox .rw-listbox-body .rw-listbox-item-disabled:not(.rw-listbox-item-selected):hover {
         background: none; }
