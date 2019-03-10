@@ -23,8 +23,8 @@ items={[{label:lucy, value: lucy}]}
 | height | css快捷属性 | number | - |
 | tabIndex | 组件tabIndex属性 | number | - |
 | multiple | 多选模式, 多选模式下value是数组 | boolean | false |
-| defaultValue | 指定默认选中的条目 | string\|number|Array\<string\|number> | - |
-| value | 指定默认选中的条目 `受控` | string\|number|Array\<string\|number> | - |
+| defaultValue | 指定默认选中的条目 | string\|number\|Array\<string\|number> | - |
+| value | 指定默认选中的条目 `受控` | string\|number\|Array\<string\|number> | - |
 | autoFocus | 默认获取焦点 | boolean | false |
 | disabled | 是否禁用 | boolean | false |
 | valueField | 设置取值字段 | string | value |
@@ -33,7 +33,7 @@ items={[{label:lucy, value: lucy}]}
 | headerStyle | 设置header的样式，renderHeader启用时有效 | React.CSSProperties | - |
 | footerStyle | 设置footer的样式，renderFooter启用时有效 | React.CSSProperties | - |
 | bodyStyle | 设置body的样式 | React.CSSProperties | - |
-| items | 组件数据 | Array\<ItemData | ItemGroupData> | [] |
+| items | 组件数据 | Array\<ItemData\|ItemGroupData> | [] |
 | itemsMap | 组件数据Hash表 | Object\<string, ItemData> | [] |
 | emptyLabel | 无内容时显示 | ReactNode | Not Found. |
 | labelInValue | 开启后`onChange(ItemData \| Array\<ItemData>)` | boolean | false |
