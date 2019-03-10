@@ -45,6 +45,13 @@ export default class ListItem extends React.Component {
             onDeselect && onDeselect(item, itemDOM)
         }
     }
+    saveItem = (dom) => {
+        this.node = dom;
+    }
+
+    getItemDOM() {
+        return this.node;
+    }
 
     render() {
         const { prefixCls, disabled, selected, children, onMouseEnter, onMouseLeave } = this.props;
@@ -55,6 +62,7 @@ export default class ListItem extends React.Component {
         });
 
         return <div
+            ref={this.saveItem}
             className={classes}
             onClick={this.handleItemClick}
             onMouseEnter={onMouseEnter}

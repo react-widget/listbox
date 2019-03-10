@@ -37,27 +37,27 @@ function getItemsMap(props) {
 export default class ListBox extends React.Component {
 
     static propTypes = {
+        prefixCls: PropTypes.string,
         className: PropTypes.string,
         style: PropTypes.object,
-        headerStyle: PropTypes.object,
-        footerStyle: PropTypes.object,
-        bodyStyle: PropTypes.object,
-        prefixCls: PropTypes.string,
+        width: PropTypes.oneOfType([PropTypes.string, PropTypes.number]),
+        height: PropTypes.oneOfType([PropTypes.string, PropTypes.number]),
+        tabIndex: PropTypes.number,
+        multiple: PropTypes.bool,
+        defaultValue: PropTypes.oneOfType([PropTypes.string, PropTypes.number, PropTypes.array]),
+        value: PropTypes.oneOfType([PropTypes.string, PropTypes.number, PropTypes.array]),
+        disabled: PropTypes.bool,
+        autoFocus: PropTypes.bool,
         valueField: PropTypes.string,
         labelField: PropTypes.string,
         childrenField: PropTypes.string,
+        headerStyle: PropTypes.object,
+        footerStyle: PropTypes.object,
+        bodyStyle: PropTypes.object,
         items: PropTypes.array,
         itemsMap: PropTypes.object,
-        defaultValue: PropTypes.oneOfType([PropTypes.string, PropTypes.number, PropTypes.array]),
-        value: PropTypes.oneOfType([PropTypes.string, PropTypes.number, PropTypes.array]),
         emptyLabel: PropTypes.any,
-        multiple: PropTypes.bool,
-        disabled: PropTypes.bool,
-        autoFocus: PropTypes.bool,
-        width: PropTypes.oneOfType([PropTypes.string, PropTypes.number]),
-        height: PropTypes.oneOfType([PropTypes.string, PropTypes.number]),
         labelInValue: PropTypes.bool,
-        tabIndex: PropTypes.number,
         enableDownUpSelect: PropTypes.bool,
         fixListBodyHeightOnIE: PropTypes.bool,
         onItemClick: PropTypes.func,
@@ -171,7 +171,7 @@ export default class ListBox extends React.Component {
             scrollIntoView(e.target, this.getListViewBody());
         }
 
-        if (onItemClick) onItemClick(item);
+        if (onItemClick) onItemClick(item, e);
     }
 
     onItemGroupClick = (item, e) => {
@@ -180,7 +180,7 @@ export default class ListBox extends React.Component {
             scrollIntoView(e.target, this.getListViewBody());
         }
 
-        if (onItemGroupClick) onItemGroupClick(item);
+        if (onItemGroupClick) onItemGroupClick(item, e);
     }
 
     transformChangeValue(value) {
@@ -229,7 +229,7 @@ export default class ListBox extends React.Component {
     }
 
     onItemDeselect = (item, el) => {
-        const { multiple, onChange, labelInValue, valueField } = this.props;
+        const { multiple, onChange, valueField } = this.props;
         const { selectedValue } = this.state;
 
         if (!multiple) return;
@@ -539,7 +539,7 @@ export default class ListBox extends React.Component {
                             className={`${prefixCls}-header`}
                             style={headerStyle}
                         >
-                            {renderHeader()}
+                            {renderHeader(this.props)}
                         </HeaderWrapperComponent> :
                         null
                 }
@@ -551,7 +551,7 @@ export default class ListBox extends React.Component {
                             className={`${prefixCls}-footer`}
                             style={footerStyle}
                         >
-                            {renderFooter()}
+                            {renderFooter(this.props)}
                         </FooterWrapperComponent> :
                         null
                 }

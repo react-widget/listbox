@@ -315,8 +315,6 @@ var _react = _interopRequireWildcard(__webpack_require__(/*! react */ "./node_mo
 
 var _src = _interopRequireDefault(__webpack_require__(/*! ../../src */ "./src/index.js"));
 
-var ListItem = _src.default.ListItem,
-    ListItemGroup = _src.default.ListItemGroup;
 var dataset = [];
 var uuid = 100;
 
@@ -592,7 +590,7 @@ function (_React$Component) {
         (0, _scrollIntoView.default)(e.target, _this.getListViewBody());
       }
 
-      if (onItemClick) onItemClick(item);
+      if (onItemClick) onItemClick(item, e);
     });
     (0, _defineProperty2.default)((0, _assertThisInitialized2.default)((0, _assertThisInitialized2.default)(_this)), "onItemGroupClick", function (item, e) {
       var onItemGroupClick = _this.props.onItemGroupClick;
@@ -601,7 +599,7 @@ function (_React$Component) {
         (0, _scrollIntoView.default)(e.target, _this.getListViewBody());
       }
 
-      if (onItemGroupClick) onItemGroupClick(item);
+      if (onItemGroupClick) onItemGroupClick(item, e);
     });
     (0, _defineProperty2.default)((0, _assertThisInitialized2.default)((0, _assertThisInitialized2.default)(_this)), "onItemSelect", function (item, el) {
       var valueField = _this.props.valueField;
@@ -612,7 +610,6 @@ function (_React$Component) {
       var _this$props = _this.props,
           multiple = _this$props.multiple,
           onChange = _this$props.onChange,
-          labelInValue = _this$props.labelInValue,
           valueField = _this$props.valueField;
       var selectedValue = _this.state.selectedValue;
       if (!multiple) return;
@@ -975,9 +972,7 @@ function (_React$Component) {
 
       var _this$props7 = this.props,
           className = _this$props7.className,
-          value = _this$props7.value,
           prefixCls = _this$props7.prefixCls,
-          items = _this$props7.items,
           width = _this$props7.width,
           height = _this$props7.height,
           tabIndex = _this$props7.tabIndex,
@@ -1006,9 +1001,7 @@ function (_React$Component) {
         style.height = height;
       }
 
-      var classes = (0, _classnames.default)((_classNames = {}, (0, _defineProperty2.default)(_classNames, "".concat(prefixCls), true), (0, _defineProperty2.default)(_classNames, className, className), (0, _defineProperty2.default)(_classNames, "".concat(prefixCls, "-disabled"), disabled), _classNames)); // scrollViewBodyCls={`${prefixCls}-body`}
-      // scrollViewBodyStyle={scrollViewBodyStyle}
-
+      var classes = (0, _classnames.default)((_classNames = {}, (0, _defineProperty2.default)(_classNames, "".concat(prefixCls), true), (0, _defineProperty2.default)(_classNames, className, className), (0, _defineProperty2.default)(_classNames, "".concat(prefixCls, "-disabled"), disabled), _classNames));
       return _react.default.createElement(WrapperComponent, {
         ref: this.saveListView,
         tabIndex: tabIndex,
@@ -1021,11 +1014,11 @@ function (_React$Component) {
         ref: this.saveListViewHeader,
         className: "".concat(prefixCls, "-header"),
         style: headerStyle
-      }, renderHeader()) : null, this.renderMenu(), renderFooter ? _react.default.createElement(FooterWrapperComponent, {
+      }, renderHeader(this.props)) : null, this.renderMenu(), renderFooter ? _react.default.createElement(FooterWrapperComponent, {
         ref: this.saveListViewFooter,
         className: "".concat(prefixCls, "-footer"),
         style: footerStyle
-      }, renderFooter()) : null);
+      }, renderFooter(this.props)) : null);
     }
   }], [{
     key: "getDerivedStateFromProps",
@@ -1053,27 +1046,27 @@ function (_React$Component) {
 
 exports.default = ListBox;
 (0, _defineProperty2.default)(ListBox, "propTypes", {
+  prefixCls: _propTypes.default.string,
   className: _propTypes.default.string,
   style: _propTypes.default.object,
-  headerStyle: _propTypes.default.object,
-  footerStyle: _propTypes.default.object,
-  bodyStyle: _propTypes.default.object,
-  prefixCls: _propTypes.default.string,
+  width: _propTypes.default.oneOfType([_propTypes.default.string, _propTypes.default.number]),
+  height: _propTypes.default.oneOfType([_propTypes.default.string, _propTypes.default.number]),
+  tabIndex: _propTypes.default.number,
+  multiple: _propTypes.default.bool,
+  defaultValue: _propTypes.default.oneOfType([_propTypes.default.string, _propTypes.default.number, _propTypes.default.array]),
+  value: _propTypes.default.oneOfType([_propTypes.default.string, _propTypes.default.number, _propTypes.default.array]),
+  disabled: _propTypes.default.bool,
+  autoFocus: _propTypes.default.bool,
   valueField: _propTypes.default.string,
   labelField: _propTypes.default.string,
   childrenField: _propTypes.default.string,
+  headerStyle: _propTypes.default.object,
+  footerStyle: _propTypes.default.object,
+  bodyStyle: _propTypes.default.object,
   items: _propTypes.default.array,
   itemsMap: _propTypes.default.object,
-  defaultValue: _propTypes.default.oneOfType([_propTypes.default.string, _propTypes.default.number, _propTypes.default.array]),
-  value: _propTypes.default.oneOfType([_propTypes.default.string, _propTypes.default.number, _propTypes.default.array]),
   emptyLabel: _propTypes.default.any,
-  multiple: _propTypes.default.bool,
-  disabled: _propTypes.default.bool,
-  autoFocus: _propTypes.default.bool,
-  width: _propTypes.default.oneOfType([_propTypes.default.string, _propTypes.default.number]),
-  height: _propTypes.default.oneOfType([_propTypes.default.string, _propTypes.default.number]),
   labelInValue: _propTypes.default.bool,
-  tabIndex: _propTypes.default.number,
   enableDownUpSelect: _propTypes.default.bool,
   fixListBodyHeightOnIE: _propTypes.default.bool,
   onItemClick: _propTypes.default.func,
@@ -1371,34 +1364,10 @@ var _interopRequireDefault = __webpack_require__(/*! @babel/runtime-corejs2/help
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
-Object.defineProperty(exports, "ListBox", {
-  enumerable: true,
-  get: function get() {
-    return _ListBox.default;
-  }
-});
-Object.defineProperty(exports, "ListItem", {
-  enumerable: true,
-  get: function get() {
-    return _ListItem.default;
-  }
-});
-Object.defineProperty(exports, "ListItemGroup", {
-  enumerable: true,
-  get: function get() {
-    return _ListItemGroup.default;
-  }
-});
 exports.default = void 0;
 
 var _ListBox = _interopRequireDefault(__webpack_require__(/*! ./ListBox */ "./src/ListBox.js"));
 
-var _ListItem = _interopRequireDefault(__webpack_require__(/*! ./ListItem */ "./src/ListItem.js"));
-
-var _ListItemGroup = _interopRequireDefault(__webpack_require__(/*! ./ListItemGroup */ "./src/ListItemGroup.js"));
-
-_ListBox.default.ListItemGroup = _ListItemGroup.default;
-_ListBox.default.ListItem = _ListItem.default;
 var _default = _ListBox.default;
 exports.default = _default;
 
@@ -1492,4 +1461,4 @@ module.exports = __webpack_require__(/*! D:\wamp\www\github-projects\react-widge
 /***/ })
 
 /******/ });
-//# sourceMappingURL=index.32677c7a.js.map
+//# sourceMappingURL=index.f435093b.js.map
