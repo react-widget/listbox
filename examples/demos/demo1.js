@@ -1,8 +1,6 @@
 import React, { Component } from 'react';
 import ListBox from '../../src';
 
-const { ListItem, ListItemGroup } = ListBox
-
 const dataset = [];
 
 var uuid = 100;

@@ -490,9 +490,7 @@ export default class ListBox extends React.Component {
     render() {
         const {
             className,
-            value,
             prefixCls,
-            items,
             width,
             height,
             tabIndex,
@@ -523,9 +521,6 @@ export default class ListBox extends React.Component {
             [className]: className,
             [`${prefixCls}-disabled`]: disabled,
         });
-
-        // scrollViewBodyCls={`${prefixCls}-body`}
-        // scrollViewBodyStyle={scrollViewBodyStyle}
 
         return (
             <WrapperComponent
