@@ -1,0 +1,6 @@
+{
+	"name": "react-widget-trigger/style",
+	"private": true,
+	"main": "../cjs/style/index.js",
+	"module": "../esm/style/index.js"
+}
