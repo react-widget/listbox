@@ -9,7 +9,14 @@ import addClass from "dom-helpers/addClass";
 import removeClass from "dom-helpers/removeClass";
 import scrollIntoView from "dom-helpers/scrollTo";
 
-export type Item = Record<string | number, any>;
+export type ItemData = Record<string | number, any>;
+
+export type Item = {
+	value: any;
+	label: React.ReactNode;
+	children?: Item[];
+	data: ItemData;
+};
 
 export interface ListBoxProps {
 	prefixCls: string;
@@ -29,6 +36,7 @@ export interface ListBoxProps {
 	headerStyle: any;
 	footerStyle: any;
 	bodyStyle: any;
+	data: ItemData[];
 	items: any;
 	itemsMap: any;
 	emptyLabel: any;
@@ -51,7 +59,11 @@ export interface ListBoxProps {
 	bodyWrapperComponent: any;
 	footerWrapperComponent: any;
 }
-export interface ListBoxState {}
+export interface ListBoxState {
+	items: Item[];
+	itemsMap: Record<any, Item>;
+	value: any[];
+}
 
 function isIE() {
 	const userAgent = navigator.userAgent;
@@ -67,12 +79,17 @@ function copy(data) {
 	return isArray(data) ? [].concat(data) : data;
 }
 
-function getItemsMap(props) {
-	const { items, valueField, childrenField } = props;
-	const maps = {};
+function dataProcessor(props: ListBoxProps) {
+	const { data, valueField, childrenField, labelField } = props;
+	const items: Item[] = [];
+	const itemsMap: Record<any, Item> = {};
 
-	function toMaps(items) {
-		items.forEach((item) => {
+	function walk(data: Item[], pChildren: Item[]) {
+		data.forEach((item) => {
+			pChildren.push({
+				value: data[valueField],
+				label: data[labelField],
+			});
 			if (item[childrenField] && Array.isArray(item[childrenField])) {
 				toMaps(item[childrenField]);
 			} else {
@@ -81,7 +98,7 @@ function getItemsMap(props) {
 		});
 	}
 
-	toMaps(items);
+	walk(data, items);
 
 	return maps;
 }
@@ -97,7 +114,7 @@ export class ListBox extends React.Component<ListBoxProps, ListBoxState> {
 		emptyLabel: "Not Found",
 		enableDownUpSelect: true,
 		fixListBodyHeightOnIE: true,
-		items: [],
+		data: [],
 		itemsMap: null,
 		onFocus: noop,
 		onBlur: noop,
@@ -108,19 +125,42 @@ export class ListBox extends React.Component<ListBoxProps, ListBoxState> {
 		footerWrapperComponent: "div",
 	};
 
-	constructor(props) {
-		super(props);
+	static getDerivedStateFromProps(nextProps: ListBoxProps, state: ListBoxState) {
+		// const value = nextProps.value;
+		// let itemsMap = nextProps.itemsMap || {};
 
-		const selectedValue = [];
-		let value;
+		// if (!nextProps.itemsMap) {
+		// 	itemsMap = getItemsMap(nextProps);
+		// }
 
-		if (!isUndefined(props.defaultValue)) {
-			value = isArray(props.defaultValue) ? props.defaultValue : [props.defaultValue];
-		}
+		// const newState: Partial<ListBoxState> = {
+		// 	itemsMap,
+		// };
 
-		if (value) {
-			selectedValue.push(...value);
-		}
+		return {
+			...dataProcessor(nextProps),
+			value:
+				nextProps.value === undefined
+					? state.value
+					: Array.isArray(nextProps.value)
+					? nextProps.value
+					: [nextProps.value],
+		};
+	}
+
+	constructor(props: ListBoxProps, context: any) {
+		super(props, context);
+
+		// const selectedValue = [];
+		// let value;
+
+		// if (!isUndefined(props.defaultValue)) {
+		// 	value = isArray(props.defaultValue) ? props.defaultValue : [props.defaultValue];
+		// }
+
+		// if (value) {
+		// 	selectedValue.push(...value);
+		// }
 
 		//item 索引id
 		this._itemIndex = 0;
@@ -129,27 +169,15 @@ export class ListBox extends React.Component<ListBoxProps, ListBoxState> {
 		this._activeIndex = null;
 
 		this.state = {
-			selectedValue,
+			items: [],
+			itemsMap: {},
+			value:
+				props.defaultValue === undefined
+					? []
+					: Array.isArray(props.defaultValue)
+					? props.defaultValue
+					: [props.defaultValue],
 		};
-	}
-
-	static getDerivedStateFromProps(nextProps, prevState) {
-		const value = nextProps.value;
-		let itemsMap = nextProps.itemsMap || {};
-
-		if (!nextProps.itemsMap) {
-			itemsMap = getItemsMap(nextProps);
-		}
-
-		const newState = {
-			itemsMap,
-		};
-
-		if (!isUndefined(value)) {
-			newState.selectedValue = isArray(value) ? copy(value) : [value];
-		}
-
-		return newState;
 	}
 
 	componentDidMount() {
