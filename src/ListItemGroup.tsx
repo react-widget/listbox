@@ -1,47 +1,34 @@
-import React from 'react';
-import PropTypes from 'prop-types';
+import React from "react";
+import { Item } from "./types";
+export interface ItemGroupProps {
+	item: Item;
+	prefixCls: string;
+	onClick: any;
+}
 
-export default class ItemGroup extends React.Component {
+export default class ItemGroup extends React.Component<ItemGroupProps> {
+	static defaultProps = {
+		prefixCls: "rw-listbox-item-group",
+		label: "",
+	};
 
-    static propTypes = {
-        label: PropTypes.node,
-        children: PropTypes.node,
-        prefixCls: PropTypes.string,
-        onClick: PropTypes.func,
-        item: PropTypes.object,
-    }
+	handleClick = (e) => {
+		const { onClick, item } = this.props;
 
-    static defaultProps = {
-        prefixCls: 'rw-listbox-item-group',
-        label: '',
-    };
+		if (onClick) {
+			onClick(item, e);
+		}
+	};
 
-    static isListItemGroup = true;
-
-    handleClick = (e) => {
-        const {
-            onClick,
-            item
-        } = this.props;
-
-        if (onClick) {
-            onClick(item, e);
-        }
-    }
-
-    render() {
-        const { prefixCls, label, children } = this.props;
-        return (
-            <div className={prefixCls}>
-                <div
-                    className={`${prefixCls}-title`}
-                    onClick={this.handleClick}
-                >{label}</div>
-                <div className={`${prefixCls}-list`}>
-                    {children}
-                </div>
-            </div>
-        );
-    }
-
+	render() {
+		const { prefixCls, item, children } = this.props;
+		return (
+			<div className={prefixCls}>
+				<div className={`${prefixCls}-title`} onClick={this.handleClick}>
+					{item.label}
+				</div>
+				<div className={`${prefixCls}-list`}>{children}</div>
+			</div>
+		);
+	}
 }

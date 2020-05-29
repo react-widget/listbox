@@ -55,8 +55,8 @@ export default class DEMO extends Component {
 					renderHeader={() => <h3>header</h3>}
 					renderFooter={() => <h3>footer</h3>}
 					renderMenu={(a) => a}
-					renderMenuItem={(a) => a + "-opt"}
-					renderMenuGroupTitle={(a) => a + "-opt"}
+					// renderMenuItem={(a) => a + "-opt"}
+					// renderMenuGroupTitle={(a) => a + "-opt"}
 					headerStyle={{
 						borderBottom: "1px solid #ccc",
 					}}
@@ -65,13 +65,13 @@ export default class DEMO extends Component {
 					}}
 					value={this.state.value}
 					onChange={this.handleChange}
-					items={dataset.filter((item, i) => item.label.indexOf(this.filterMsg) >= 0)}
+					data={dataset.filter((item, i) => item.label.indexOf(this.filterMsg) >= 0)}
 					emptyLabel="无匹配项"
 					onItemGroupClick={(d) => console.log(d)}
 				/>
 
 				<ListBox
-					items={dataset}
+					data={dataset}
 					multiple
 					disabled={false}
 					labelInValue
@@ -86,7 +86,7 @@ export default class DEMO extends Component {
 					disabled={false}
 					labelInValue
 					onChange={this.handleChange2}
-					items={dataset}
+					data={dataset}
 					style={{
 						maxWidth: 300,
 						height: 400,

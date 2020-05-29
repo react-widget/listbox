@@ -1,12 +1,17 @@
 import React from "react";
 import { findDOMNode } from "react-dom";
 import classNames from "classnames";
-// import ListItem from "./ListItem";
-// import ListItemGroup from "./ListItemGroup";
+import ListItem from "./ListItem";
+import ListItemGroup from "./ListItemGroup";
 import hasClass from "dom-helpers/hasClass";
 import addClass from "dom-helpers/addClass";
 import removeClass from "dom-helpers/removeClass";
 import scrollIntoView from "dom-helpers/scrollTo";
+
+const KEY_UP = 38;
+const KEY_DOWN = 40;
+const KEY_ENTER = 13;
+const DEFAULT_ACTIVE_VALUE = Symbol("DefaultActiveValue");
 
 export type ItemData = Record<string | number, any>;
 
@@ -63,6 +68,8 @@ export interface ListBoxState {
 	items: Item[];
 	itemsMap: Record<any, Item>;
 	value: any[];
+	prevProps?: ListBoxProps;
+	activeItemValue?: any;
 }
 
 function isIE() {
@@ -130,6 +137,10 @@ export class ListBox extends React.Component<ListBoxProps, ListBoxState> {
 	};
 
 	static getDerivedStateFromProps(nextProps: ListBoxProps, state: ListBoxState) {
+		if (nextProps === state.prevProps) {
+			return null;
+		}
+
 		return {
 			...dataProcessor(nextProps),
 			value:
@@ -138,6 +149,7 @@ export class ListBox extends React.Component<ListBoxProps, ListBoxState> {
 					: Array.isArray(nextProps.value)
 					? nextProps.value
 					: [nextProps.value],
+			prevProps: nextProps,
 		};
 	}
 
@@ -164,6 +176,7 @@ export class ListBox extends React.Component<ListBoxProps, ListBoxState> {
 		this.state = {
 			items: [],
 			itemsMap: {},
+			activeItemValue: DEFAULT_ACTIVE_VALUE,
 			value:
 				props.defaultValue === undefined
 					? []
@@ -279,84 +292,124 @@ export class ListBox extends React.Component<ListBoxProps, ListBoxState> {
 	// 	}
 	// };
 
-	// onKeyDown = (e) => {
-	// 	const { prefixCls } = this.props;
-	// 	const selector = `.${prefixCls}-item:not(.${prefixCls}-item-disabled)`;
-	// 	const activeCls = `${prefixCls}-item-active`;
-	// 	const selectCls = `${prefixCls}-item-selected`;
-	// 	let list = null; //NodeList[]
+	scrollActiveItemIntoView() {}
 
-	// 	function getActiveIndex(keyCode) {
-	// 		let idx = -1;
-	// 		const UP = keyCode === 38;
-	// 		const DOWN = keyCode === 40;
-	// 		let sIdx = -1;
+	protected getActiveIndex(items: Item[]) {}
 
-	// 		if (list) {
-	// 			//ie no support NodeList.prototype.forEach
-	// 			each(list, (item, i) => {
-	// 				if (hasClass(item, activeCls)) {
-	// 					removeClass(item, activeCls);
-	// 					if (UP) {
-	// 						if (idx === -1) idx = i;
-	// 					} else {
-	// 						idx = i;
-	// 					}
-	// 				} else if (idx === -1 && hasClass(item, selectCls)) {
-	// 					sIdx = i;
-	// 				}
-	// 			});
-	// 		}
+	protected getNextActiveItem() {}
 
-	// 		return idx === -1 ? sIdx : idx;
-	// 	}
+	onKeyDown = (e: React.KeyboardEvent) => {
+		const { prefixCls } = this.props;
+		const selector = `.${prefixCls}-item:not(.${prefixCls}-item-disabled)`;
+		const activeCls = `${prefixCls}-item-active`;
+		const selectCls = `${prefixCls}-item-selected`;
+		const keyCode = e.keyCode;
+		let list = null; //NodeList[]
 
-	// 	const props = this.props;
-	// 	const state = this.state;
-	// 	const dom = findDOMNode(this);
-	// 	const UP = e.keyCode === 38;
-	// 	const DOWN = e.keyCode === 40;
-	// 	const ENTER = e.keyCode === 13;
-	// 	const indexValueMap = this._indexValueMap;
-	// 	const activeIndex = this._activeIndex;
+		if (keyCode === KEY_DOWN || keyCode === KEY_UP) {
+			e.preventDefault();
+		}
 
-	// 	if (props.enableDownUpSelect) {
-	// 		props.onKeyDown(e);
-	// 	}
+		console.log(e.keyCode);
 
-	// 	if (!list) {
-	// 		list = dom.querySelectorAll(selector);
-	// 	}
+		// function getActiveIndex(keyCode) {
+		// 	let idx = -1;
+		// 	const UP = keyCode === 38;
+		// 	const DOWN = keyCode === 40;
+		// 	let sIdx = -1;
 
-	// 	if (!list.length) return;
+		// 	if (list) {
+		// 		//ie no support NodeList.prototype.forEach
+		// 		each(list, (item, i) => {
+		// 			if (hasClass(item, activeCls)) {
+		// 				removeClass(item, activeCls);
+		// 				if (UP) {
+		// 					if (idx === -1) idx = i;
+		// 				} else {
+		// 					idx = i;
+		// 				}
+		// 			} else if (idx === -1 && hasClass(item, selectCls)) {
+		// 				sIdx = i;
+		// 			}
+		// 		});
+		// 	}
 
-	// 	const minIndex = 0;
-	// 	const maxIndex = list.length - 1;
+		// 	return idx === -1 ? sIdx : idx;
+		// }
 
-	// 	if (UP || DOWN) {
-	// 		e.preventDefault();
-	// 		let idx = getActiveIndex(e.keyCode);
+		// const props = this.props;
+		// const state = this.state;
+		// const dom = findDOMNode(this);
+		// const UP = e.keyCode === 38;
+		// const DOWN = e.keyCode === 40;
+		// const ENTER = e.keyCode === 13;
+		// const indexValueMap = this._indexValueMap;
+		// const activeIndex = this._activeIndex;
 
-	// 		if (UP) {
-	// 			idx = idx === -1 ? maxIndex : --idx;
-	// 			if (idx < 0) idx = maxIndex;
-	// 			addClass(list[idx], activeCls);
-	// 		} else {
-	// 			idx = idx === -1 ? minIndex : ++idx;
-	// 			if (idx > maxIndex) idx = 0;
-	// 			addClass(list[idx], activeCls);
-	// 		}
+		// if (props.enableDownUpSelect) {
+		// 	props.onKeyDown(e);
+		// }
 
-	// 		this._activeIndex = list[idx].getAttribute("data-index");
-	// 		scrollIntoView(list[idx], this.getListViewBody());
-	// 	} else if (ENTER && activeIndex !== null) {
-	// 		const value = indexValueMap[activeIndex];
-	// 		const item = state.itemsMap[value];
-	// 		this.setValue(value);
-	// 		//触发onItemClick
-	// 		this.onItemClick(item);
-	// 	}
-	// };
+		// if (!list) {
+		// 	list = dom.querySelectorAll(selector);
+		// }
+
+		// if (!list.length) return;
+
+		// const minIndex = 0;
+		// const maxIndex = list.length - 1;
+
+		// if (UP || DOWN) {
+		// 	e.preventDefault();
+		// 	let idx = getActiveIndex(e.keyCode);
+
+		// 	if (UP) {
+		// 		idx = idx === -1 ? maxIndex : --idx;
+		// 		if (idx < 0) idx = maxIndex;
+		// 		addClass(list[idx], activeCls);
+		// 	} else {
+		// 		idx = idx === -1 ? minIndex : ++idx;
+		// 		if (idx > maxIndex) idx = 0;
+		// 		addClass(list[idx], activeCls);
+		// 	}
+
+		// 	this._activeIndex = list[idx].getAttribute("data-index");
+		// 	scrollIntoView(list[idx], this.getListViewBody());
+		// } else if (ENTER && activeIndex !== null) {
+		// 	const value = indexValueMap[activeIndex];
+		// 	const item = state.itemsMap[value];
+		// 	this.setValue(value);
+		// 	//触发onItemClick
+		// 	this.onItemClick(item);
+		// }
+	};
+
+	handleItemMouseEnter = (e: React.MouseEvent) => {
+		const { prefixCls } = this.props;
+		addClass(e.currentTarget, `${prefixCls}-item-active`);
+	};
+
+	handleItemMouseLeave = (e: React.MouseEvent) => {
+		const { prefixCls } = this.props;
+		removeClass(e.currentTarget, `${prefixCls}-item-active`);
+	};
+
+	handleItemClick = (e: React.MouseEvent) => {};
+
+	handleGroupClick = (e: React.MouseEvent) => {};
+
+	renderGroup(item: Item, selectedMap) {
+		const { prefixCls } = this.props;
+
+		return (
+			<div className={`${prefixCls}-item-group`}>
+				<div className={`${prefixCls}-group-title`}>{item.label}</div>
+				<div className={`${prefixCls}-group-list`}>
+					{this.renderListItems(item.children!, selectedMap)}
+				</div>
+			</div>
+		);
+	}
 
 	renderListItems(items: Item[], selectedMap) {
 		const {
@@ -368,18 +421,34 @@ export class ListBox extends React.Component<ListBoxProps, ListBoxState> {
 			renderMenuItem,
 			renderMenuGroupTitle,
 		} = this.props;
+		const { activeItemValue } = this.state;
 
 		return items.map((item) => {
 			const isGroup = item.children;
 			const itemPrefixCls = `${prefixCls}-item`;
+			const groupPrefixCls = `${prefixCls}-group`;
 			const activeCls = `${prefixCls}-item-active`;
 
 			return item.children ? (
-				<div className={classNames(`${prefixCls}-group`)}>
+				<ListItemGroup
+					prefixCls={groupPrefixCls}
+					item={item}
+					onClick={this.handleGroupClick}
+				>
 					{this.renderListItems(item.children, selectedMap)}
-				</div>
+				</ListItemGroup>
 			) : (
-				<div className={classNames({ [`${prefixCls}-item`]: true })}>{item.label}</div>
+				<ListItem
+					prefixCls={itemPrefixCls}
+					item={item}
+					selected={false}
+					active={activeItemValue === item.value}
+					onClick={this.handleItemClick}
+					onMouseEnter={this.handleItemMouseEnter}
+					onMouseLeave={this.handleItemMouseLeave}
+				>
+					{renderMenuItem ? renderMenuItem(item.data) : item.label}
+				</ListItem>
 			);
 		});
 
@@ -579,7 +648,7 @@ export class ListBox extends React.Component<ListBoxProps, ListBoxState> {
 				tabIndex={tabIndex}
 				className={classes}
 				style={style}
-				// onKeyDown={enableDownUpSelect ? this.onKeyDown : onKeyDown}
+				onKeyDown={enableDownUpSelect ? this.onKeyDown : onKeyDown}
 				onFocus={onFocus}
 				onBlur={onBlur}
 			>

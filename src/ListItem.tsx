@@ -1,75 +1,96 @@
-import React from 'react';
-import PropTypes from 'prop-types';
-import classNames from 'classnames';
-import shallowEqual from 'shallowequal';
+import React from "react";
+import classNames from "classnames";
+import shallowEqual from "shallowequal";
 
-export default class ListItem extends React.Component {
+import { Item } from "./types";
 
-    static propTypes = {
-        prefixCls: PropTypes.string,
-        onSelect: PropTypes.func,
-        onDeselect: PropTypes.func,
-        onClick: PropTypes.func,
-        onMouseEnter: PropTypes.func,
-        onMouseLeave: PropTypes.func,
-        selected: PropTypes.bool,
-        disabled: PropTypes.bool,
-        item: PropTypes.object,
-    }
+export interface ListItemProps {
+	prefixCls: string;
+	// onSelect: string;
+	// onDeselect: string;
+	onClick: any;
+	onMouseEnter: any;
+	onMouseLeave: any;
+	selected: boolean;
+	active: boolean;
+	item: Item;
+}
 
-    static defaultProps = {
-        prefixCls: 'rw-listbox-item',
-        selected: false,
-        disabled: false,
-    }
+export interface ListItemState {}
 
-    static isListItem = true;
+export default class ListItem extends React.Component<ListItemProps> {
+	// static propTypes = {
+	//     prefixCls: PropTypes.string,
+	//     onSelect: PropTypes.func,
+	//     onDeselect: PropTypes.func,
+	//     onClick: PropTypes.func,
+	//     onMouseEnter: PropTypes.func,
+	//     onMouseLeave: PropTypes.func,
+	//     selected: PropTypes.bool,
+	//     disabled: PropTypes.bool,
+	//     item: PropTypes.object,
+	// }
 
-    shouldComponentUpdate(nextProps, nextState) {
-        return !shallowEqual(this.props, nextProps) ||
-            !shallowEqual(this.state, nextState);
-    }
+	static defaultProps = {
+		prefixCls: "rw-listbox-item",
+		selected: false,
+		disabled: false,
+	};
 
-    handleItemClick = (e) => {
-        const { onSelect, onDeselect, onClick, selected, disabled, item } = this.props;
-        const itemDOM = this.getItemDOM();
-        if (disabled) return;
+	shouldComponentUpdate(nextProps, nextState) {
+		return !shallowEqual(this.props, nextProps) || !shallowEqual(this.state, nextState);
+	}
 
-        if (onClick) {
-            onClick(item, e);
-        }
+	handleItemClick = (e) => {
+		const { onClick, selected, item, active } = this.props;
+		// const itemDOM = this.getItemDOM();
+		if (item.disabled) return;
 
-        if (!selected) {
-            onSelect && onSelect(item, itemDOM)
-        } else {
-            onDeselect && onDeselect(item, itemDOM)
-        }
-    }
-    saveItem = (dom) => {
-        this.node = dom;
-    }
+		if (onClick) {
+			onClick(item, e);
+		}
 
-    getItemDOM() {
-        return this.node;
-    }
+		// if (!selected) {
+		// 	onSelect && onSelect(item, itemDOM);
+		// } else {
+		// 	onDeselect && onDeselect(item, itemDOM);
+		// }
+	};
+	// saveItem = (dom) => {
+	// 	this.node = dom;
+	// };
 
-    render() {
-        const { prefixCls, disabled, selected, children, onMouseEnter, onMouseLeave } = this.props;
-        const classes = classNames({
-            [`${prefixCls}`]: true,
-            [`${prefixCls}-selected`]: selected,
-            [`${prefixCls}-disabled`]: disabled,
-        });
+	// getItemDOM() {
+	// 	return this.node;
+	// }
 
-        return <div
-            ref={this.saveItem}
-            className={classes}
-            onClick={this.handleItemClick}
-            onMouseEnter={onMouseEnter}
-            onMouseLeave={onMouseLeave}
-        >
-            {children}
-        </div>;
-    }
+	render() {
+		const {
+			prefixCls,
+			item,
+			selected,
+			children,
+			active,
+			onMouseEnter,
+			onMouseLeave,
+		} = this.props;
+		const classes = classNames({
+			[`${prefixCls}`]: true,
+			[`${prefixCls}-active`]: active,
+			[`${prefixCls}-selected`]: selected,
+			[`${prefixCls}-disabled`]: item.disabled,
+		});
 
+		return (
+			<div
+				// ref={this.saveItem}
+				className={classes}
+				onClick={this.handleItemClick}
+				onMouseEnter={onMouseEnter}
+				onMouseLeave={onMouseLeave}
+			>
+				{children}
+			</div>
+		);
+	}
 }
