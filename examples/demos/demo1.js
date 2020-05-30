@@ -26,15 +26,15 @@ for (let i = 0; i < 10; i++) {
 
 export default class DEMO extends Component {
 	state = {
-		value: 2,
+		value: 102,
 	};
 
-	handleChange = (value) => {
+	handleChange = (value, items) => {
 		this.setState({
 			value,
 		});
 
-		console.log("changed ", value);
+		console.log("changed ", value, items);
 	};
 
 	handleChange2 = (value) => {

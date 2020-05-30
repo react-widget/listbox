@@ -3,17 +3,14 @@ import { findDOMNode } from "react-dom";
 import classNames from "classnames";
 import ListItem from "./ListItem";
 import ListItemGroup from "./ListItemGroup";
-import hasClass from "dom-helpers/hasClass";
-import addClass from "dom-helpers/addClass";
-import removeClass from "dom-helpers/removeClass";
 import scrollIntoView from "dom-helpers/scrollTo";
 
 const KEY_UP = 38;
 const KEY_DOWN = 40;
 const KEY_ENTER = 13;
-const DEFAULT_ACTIVE_VALUE = Symbol("DefaultActiveValue");
 
 export type ItemData = Record<string | number, any>;
+export type ValueType = number | string;
 
 export type Item = {
 	value: any;
@@ -28,44 +25,41 @@ export interface ListBoxProps {
 	prefixCls?: string;
 	className?: string;
 	style?: React.CSSProperties;
-	width?: number | string;
-	height?: number | string;
 	tabIndex?: number;
 	multiple?: boolean;
-	defaultValue?: any[];
-	value?: any[];
+	defaultValue?: ValueType | ValueType[];
+	value?: ValueType | ValueType[];
 	disabled?: boolean;
 	autoFocus?: boolean;
 	valueField?: string;
 	labelField?: string;
 	disabledField?: string;
-	childrenField?: any;
-	headerStyle?: any;
-	footerStyle?: any;
-	bodyStyle?: any;
+	childrenField?: string;
+	headerStyle?: React.CSSProperties;
+	footerStyle?: React.CSSProperties;
+	bodyStyle?: React.CSSProperties;
 	data?: ItemData[];
-	items?: any;
-	itemsMap?: any;
-	emptyLabel?: any;
-	enableDownUpSelect?: boolean;
+	emptyLabel?: React.ReactNode;
+	getItemProps?: (data: ItemData) => React.HTMLAttributes<HTMLElement>;
+	getGroupTitleProps?: (data: ItemData) => React.HTMLAttributes<HTMLElement>;
+	// Invalid
 	fixListBodyHeightOnIE?: boolean;
-	onSelect?: (value: any | any[], data: {}[] | {}) => void;
-	onItemClick?: any;
-	onItemGroupClick?: any;
-	onChange?: (value: any | any[], data: {}[] | {}) => void;
-	onFocus?: any;
-	onBlur?: any;
-	onKeyDown?: any;
-	onMouseLeave?: any;
-	renderMenu?: any;
-	renderMenuGroupTitle?: any;
-	renderMenuItem?: any;
-	renderHeader?: any;
-	renderFooter?: any;
-	wrapperComponent?: any;
-	headerWrapperComponent?: any;
-	bodyWrapperComponent?: any;
-	footerWrapperComponent?: any;
+	onSelect?: (value: string | number, data: ItemData) => void;
+	onDeselect?: (value: ValueType, data: ItemData) => void;
+	onChange?: (value: ValueType | ValueType[], data: ItemData[] | ItemData) => void;
+	onFocus?: (e: React.FocusEvent) => void;
+	onBlur?: (e: React.FocusEvent) => void;
+	onKeyDown?: (e: React.KeyboardEvent) => void;
+	onMouseLeave?: (e: React.MouseEvent) => void;
+	renderGroupTitle?: (data: ItemData) => React.ReactNode;
+	renderItem?: (data: ItemData, item: Item) => React.ReactNode;
+	// TODO:
+	renderHeader?: () => React.ReactNode;
+	renderFooter?: () => React.ReactNode;
+	wrapperComponent: React.ElementType;
+	headerWrapperComponent: React.ElementType;
+	bodyWrapperComponent: React.ElementType;
+	footerWrapperComponent: React.ElementType;
 }
 export interface ListBoxState {
 	items: Item[];
@@ -76,15 +70,13 @@ export interface ListBoxState {
 	activeItem?: Item | null;
 }
 
-function isIE() {
-	const userAgent = navigator.userAgent;
-	const isIE = userAgent.indexOf("compatible") > -1 && userAgent.indexOf("MSIE") > -1;
-	const isIE11 = userAgent.indexOf("Trident") > -1 && userAgent.indexOf("rv:11.0") > -1;
+// function isIE() {
+// 	const userAgent = navigator.userAgent;
+// 	const isIE = userAgent.indexOf("compatible") > -1 && userAgent.indexOf("MSIE") > -1;
+// 	const isIE11 = userAgent.indexOf("Trident") > -1 && userAgent.indexOf("rv:11.0") > -1;
 
-	return isIE || isIE11;
-}
-
-function noop() {}
+// 	return isIE || isIE11;
+// }
 
 function dataProcessor(props: ListBoxProps) {
 	const { data, valueField, childrenField, labelField, disabledField } = props;
@@ -92,7 +84,7 @@ function dataProcessor(props: ListBoxProps) {
 	const itemList: Item[] = [];
 	const itemsMap: Record<any, Item> = {};
 
-	function walk(dataset: {}[], pChildren: Item[]) {
+	function walk(dataset: ItemData[], pChildren: Item[]) {
 		dataset.forEach((data) => {
 			const item: Item = {
 				value: data[valueField!],
@@ -107,8 +99,8 @@ function dataProcessor(props: ListBoxProps) {
 
 			itemsMap[data[valueField!]] = item;
 
-			if (data[childrenField] && Array.isArray(data[childrenField])) {
-				walk(data[childrenField], (item.children = []));
+			if (data[childrenField!] && Array.isArray(data[childrenField!])) {
+				walk(data[childrenField!], (item.children = []));
 			}
 		});
 	}
@@ -123,7 +115,7 @@ function dataProcessor(props: ListBoxProps) {
 }
 
 export class ListBox extends React.Component<ListBoxProps, ListBoxState> {
-	static defaultProps = {
+	static defaultProps: ListBoxProps = {
 		prefixCls: "rw-listbox",
 		valueField: "value",
 		labelField: "label",
@@ -131,13 +123,8 @@ export class ListBox extends React.Component<ListBoxProps, ListBoxState> {
 		childrenField: "children",
 		tabIndex: 0,
 		emptyLabel: "Not Found",
-		enableDownUpSelect: true,
 		fixListBodyHeightOnIE: true,
 		data: [],
-		itemsMap: null,
-		onFocus: noop,
-		onBlur: noop,
-		onKeyDown: noop,
 		wrapperComponent: "div",
 		headerWrapperComponent: "div",
 		bodyWrapperComponent: "div",
@@ -164,23 +151,6 @@ export class ListBox extends React.Component<ListBoxProps, ListBoxState> {
 	constructor(props: ListBoxProps, context: any) {
 		super(props, context);
 
-		// const selectedValue = [];
-		// let value;
-
-		// if (!isUndefined(props.defaultValue)) {
-		// 	value = isArray(props.defaultValue) ? props.defaultValue : [props.defaultValue];
-		// }
-
-		// if (value) {
-		// 	selectedValue.push(...value);
-		// }
-
-		//item 索引id
-		// this._itemIndex = 0;
-		// //索引值对应的item.value
-		// this._indexValueMap = {};
-		// this._activeIndex = null;
-
 		this.state = {
 			items: [],
 			itemList: [],
@@ -194,23 +164,7 @@ export class ListBox extends React.Component<ListBoxProps, ListBoxState> {
 		};
 	}
 
-	protected popupInstance: React.ReactInstance;
-	protected refHandlers = {};
-
-	// componentDidMount() {
-	// 	const { prefixCls, autoFocus } = this.props;
-	// 	const el = findDOMNode(this);
-	// 	const selector = `.${prefixCls}-item-selected`;
-
-	// 	if (autoFocus) {
-	// 		this.focus();
-	// 	}
-
-	// 	const selectedItem = el.querySelector(selector);
-	// 	if (selectedItem) {
-	// 		scrollIntoView(selectedItem, this.getListViewBody());
-	// 	}
-	// }
+	// protected refHandlers = {};
 
 	focus() {
 		(findDOMNode(this) as HTMLElement).focus();
@@ -224,87 +178,34 @@ export class ListBox extends React.Component<ListBoxProps, ListBoxState> {
 		return this.state.itemsMap[value] || null;
 	}
 
-	fireChange(value: any) {}
-
-	// onItemClick = (item, e) => {
-	// 	const { onItemClick } = this.props;
-	// 	if (e) {
-	// 		scrollIntoView(e.target, this.getListViewBody());
-	// 	}
-
-	// 	if (onItemClick) onItemClick(item, e);
-	// };
-
-	// onItemGroupClick = (item, e) => {
-	// 	const { onItemGroupClick } = this.props;
-	// 	if (e) {
-	// 		scrollIntoView(e.target, this.getListViewBody());
-	// 	}
-
-	// 	if (onItemGroupClick) onItemGroupClick(item, e);
-	// };
-
-	// transformChangeValue(value) {
-	// 	const { labelInValue } = this.props;
-	// 	const { itemsMap } = this.state;
-
-	// 	if (labelInValue) {
-	// 		return isArray(value) ? value.map((v) => itemsMap[v]) : itemsMap[value];
-	// 	}
-
-	// 	return value;
-	// }
-
-	setValue(value) {
-		const { multiple, onChange } = this.props;
-		// const { selectedValue } = this.state;
-
-		// if (!multiple) {
-		// 	selectedValue.length = 0;
-		// }
-
-		// selectedValue.push(value);
-		// if (!("value" in this.props)) {
-		// 	this.setState({
-		// 		selectedValue,
-		// 	});
-		// }
-
-		// if (onChange) {
-		// 	onChange(this.transformChangeValue(multiple ? copy(selectedValue) : selectedValue[0]));
-		// }
+	fireSelect(item: Item) {
+		const { onSelect } = this.props;
+		onSelect?.(item.value, item);
 	}
 
-	// getVaule() {
-	// 	const { multiple } = this.props;
-	// 	const { selectedValue } = this.state;
+	fireDeselect(item: Item) {
+		const { onDeselect } = this.props;
+		onDeselect?.(item.value, item);
+	}
 
-	// 	return this.transformChangeValue(multiple ? copy(selectedValue) : selectedValue[0]);
-	// }
+	setValue(newValue: any[]) {
+		const { multiple, onChange, onSelect } = this.props;
 
-	// onItemSelect = (item, el) => {
-	// 	const { valueField } = this.props;
-	// 	this.setValue(item[valueField]);
-	// };
+		if (this.props.value === undefined) {
+			this.setState({
+				value: newValue,
+			});
+		}
 
-	// onItemDeselect = (item, el) => {
-	// 	const { multiple, onChange, valueField } = this.props;
-	// 	const { selectedValue } = this.state;
-
-	// 	if (!multiple) return;
-
-	// 	let newSelectedValue = selectedValue.filter((d) => !isEqual(item[valueField], d));
-
-	// 	if (!("value" in this.props)) {
-	// 		this.setState({
-	// 			selectedValue: newSelectedValue,
-	// 		});
-	// 	}
-
-	// 	if (onChange) {
-	// 		onChange(this.transformChangeValue(copy(newSelectedValue)));
-	// 	}
-	// };
+		if (multiple) {
+			const items = newValue.map((value) => this.getItemByValue(value)?.data!);
+			onChange?.(newValue, items);
+		} else {
+			if (!newValue.length) return;
+			const item = this.getItemByValue(newValue[0]);
+			onChange?.(newValue[0], item?.data!);
+		}
+	}
 
 	scrollActiveItemIntoView() {
 		const { activeItem } = this.state;
@@ -359,6 +260,30 @@ export class ListBox extends React.Component<ListBoxProps, ListBoxState> {
 		return activeItem;
 	}
 
+	toggleSelectItem(item: Item) {
+		const { multiple } = this.props;
+		const { value } = this.state;
+		const idx = value.indexOf(item.value);
+
+		if (multiple) {
+			if (idx === -1) {
+				this.setValue([...value, item.value]);
+			} else {
+				const newValue = [...value];
+				newValue.splice(idx, 1);
+				this.setValue(newValue);
+			}
+
+			if (idx !== -1) {
+				this.fireSelect(item);
+			} else {
+				this.fireDeselect(item);
+			}
+		} else if (idx === -1) {
+			this.setValue([item.value]);
+		}
+	}
+
 	onKeyDown = (e: React.KeyboardEvent) => {
 		const { activeItem } = this.state;
 		const keyCode = e.keyCode;
@@ -374,7 +299,7 @@ export class ListBox extends React.Component<ListBoxProps, ListBoxState> {
 				}
 			);
 		} else if (activeItem && keyCode === KEY_ENTER) {
-			this.fireChange(activeItem.value);
+			this.toggleSelectItem(activeItem);
 		}
 	};
 
@@ -401,8 +326,6 @@ export class ListBox extends React.Component<ListBoxProps, ListBoxState> {
 	};
 
 	handleItemClick = (cValue: any, e: React.MouseEvent<HTMLElement>) => {
-		const { multiple, onChange, onSelect } = this.props;
-		const { value } = this.state;
 		const item = this.getItemByValue(cValue);
 
 		if (!item) return;
@@ -411,66 +334,31 @@ export class ListBox extends React.Component<ListBoxProps, ListBoxState> {
 
 		if (item.disabled) return;
 
-		if (this.props.value === undefined) {
-			this.setState({
-				value: [item.value],
-			});
-		}
-
-		onChange?.(value, item.data);
-
-		onSelect?.(value, item.data);
-
-		// const newValues = [];
-
-		// if (multiple) {
-		// } else {
-		// 	this.setState({
-		// 		value: item.value,
-		// 	});
-		// }
+		this.toggleSelectItem(item);
 	};
 
-	handleGroupClick = (e: React.MouseEvent) => {};
+	getItemProps = (data: ItemData): React.HTMLAttributes<HTMLElement> => {
+		const { getItemProps } = this.props;
 
-	renderGroup(item: Item, selectedMap) {
-		const { prefixCls } = this.props;
+		return getItemProps ? getItemProps(data) : {};
+	};
 
-		return (
-			<div className={`${prefixCls}-item-group`}>
-				<div className={`${prefixCls}-group-title`}>{item.label}</div>
-				<div className={`${prefixCls}-group-list`}>
-					{this.renderListItems(item.children!, selectedMap)}
-				</div>
-			</div>
-		);
-	}
-
-	renderListItems(items: Item[], selectedMap) {
-		const {
-			labelField,
-			valueField,
-			childrenField,
-			prefixCls,
-			disabled,
-			renderMenuItem,
-			renderMenuGroupTitle,
-		} = this.props;
+	renderListItems(items: Item[]) {
+		const { prefixCls, renderItem, renderGroupTitle, getGroupTitleProps } = this.props;
 		const { activeItem, value } = this.state;
 
 		return items.map((item) => {
-			const isGroup = item.children;
 			const itemPrefixCls = `${prefixCls}-item`;
 			const groupPrefixCls = `${prefixCls}-group`;
-			const activeCls = `${prefixCls}-item-active`;
 
 			return item.children ? (
 				<ListItemGroup
+					getGroupTitleProps={getGroupTitleProps}
 					prefixCls={groupPrefixCls}
 					item={item}
-					onClick={this.handleGroupClick}
+					renderGroupTitle={renderGroupTitle}
 				>
-					{this.renderListItems(item.children, selectedMap)}
+					{this.renderListItems(item.children)}
 				</ListItemGroup>
 			) : (
 				<ListItem
@@ -480,118 +368,30 @@ export class ListBox extends React.Component<ListBoxProps, ListBoxState> {
 					data={item.data}
 					value={item.value}
 					disabled={item.disabled}
+					getItemProps={this.getItemProps}
 					selected={value.indexOf(item.value) !== -1}
 					active={activeItem?.value === item.value}
 					onClick={this.handleItemClick}
 					onMouseEnter={this.handleItemMouseEnter}
 					onMouseLeave={this.handleItemMouseLeave}
 				>
-					{renderMenuItem ? renderMenuItem(item.data) : item.label}
+					{renderItem ? renderItem(item.data, item) : item.label}
 				</ListItem>
 			);
 		});
-
-		// 	let onMouseEnter = noop;
-		// 	let onMouseLeave = noop;
-		// 	let itemIndex = this._itemIndex++;
-
-		// 	if (!isGroup) {
-		// 		this._indexValueMap[itemIndex] = item[valueField];
-
-		// 		if (!disabled && !item.disabled) {
-		// 			onMouseEnter = (e) => {
-		// 				addClass(e.currentTarget, activeCls);
-		// 			};
-		// 			onMouseLeave = (e) => {
-		// 				removeClass(e.currentTarget, activeCls);
-		// 			};
-		// 		}
-		// 	}
-
-		// 	return !isGroup ? (
-		// 		<ListItem
-		// 			key={item[valueField]}
-		// 			prefixCls={itemPrefixCls}
-		// 			selected={selectedMap[item[valueField]]}
-		// 			disabled={disabled || !!item.disabled}
-		// 			data-index={itemIndex}
-		// 			onClick={this.onItemClick}
-		// 			onSelect={this.onItemSelect}
-		// 			onDeselect={this.onItemDeselect}
-		// 			onMouseEnter={onMouseEnter}
-		// 			onMouseLeave={onMouseLeave}
-		// 			item={item}
-		// 		>
-		// 			{renderMenuItem ? renderMenuItem(item[labelField], item) : item[labelField]}
-		// 		</ListItem>
-		// 	) : (
-		// 		<ListItemGroup
-		// 			prefixCls={`${itemPrefixCls}-group`}
-		// 			key={item[labelField]}
-		// 			value={item[valueField]}
-		// 			onClick={this.onItemGroupClick}
-		// 			item={item}
-		// 			label={
-		// 				renderMenuGroupTitle
-		// 					? renderMenuGroupTitle(item[labelField], item)
-		// 					: item[labelField]
-		// 			}
-		// 		>
-		// 			{this.renderListItems(item[childrenField] || [], selectedMap)}
-		// 		</ListItemGroup>
-		// 	);
-		// });
 	}
 
 	renderList() {
 		const { emptyLabel } = this.props;
-		const { value, items } = this.state;
+		const { items } = this.state;
 
-		const selectedMap = {};
-		value.forEach((v) => (selectedMap[v] = true));
-
-		// this._itemIndex = 0;
-		// this._indexValueMap = {};
-		// this._activeIndex = null;
-
-		if (items && !items.length) {
+		if (!items.length) {
 			return emptyLabel;
 		}
 
-		return this.renderListItems(items, selectedMap);
+		return this.renderListItems(items);
 	}
 
-	// saveListView = (node) => {
-	// 	this._listview = node;
-	// };
-
-	// saveListViewHeader = (node) => {
-	// 	this._listview_header = node;
-	// };
-
-	// saveListViewBody = (node) => {
-	// 	this._listview_body = node;
-	// };
-
-	// saveListViewFooter = (node) => {
-	// 	this._listview_footer = node;
-	// };
-
-	// getListView() {
-	// 	return findDOMNode(this._listview) as HTMLElement;
-	// }
-
-	// getListViewHeader() {
-	// 	return findDOMNode(this._listview_header) as HTMLElement;
-	// }
-
-	// getListViewBody() {
-	// 	return findDOMNode(this._listview_body) as HTMLElement;
-	// }
-
-	// getListViewFooter() {
-	// 	return findDOMNode(this._listview_footer) as HTMLElement;
-	// }
 	//修正IE对flex支持不够完善
 	// resizeListBoxBodyHeight() {
 	// 	const dom = this.getListView();
@@ -611,38 +411,32 @@ export class ListBox extends React.Component<ListBoxProps, ListBoxState> {
 	// 	}
 	// }
 
-	// componentDidMount() {
-	// 	const fixListBodyHeightOnIE = this.props.fixListBodyHeightOnIE;
-	// 	if (isIE() && fixListBodyHeightOnIE) {
-	// 		this.resizeListBoxBodyHeight();
-	// 	}
-	// }
+	componentDidMount() {
+		const { autoFocus, fixListBodyHeightOnIE } = this.props;
+		const { value } = this.state;
 
-	// componentDidUpdate() {
-	// 	const fixListBodyHeightOnIE = this.props.fixListBodyHeightOnIE;
-	// 	if (isIE() && fixListBodyHeightOnIE) {
-	// 		this.resizeListBoxBodyHeight();
-	// 	}
-	// }
+		// if (isIE() && fixListBodyHeightOnIE) {
+		// 	this.resizeListBoxBodyHeight();
+		// }
+
+		if (autoFocus) {
+			this.focus();
+		}
+
+		if (value.length) {
+			const item = this.getItemByValue(value[0]);
+			if (item && item.ref.current) {
+				scrollIntoView(item.ref.current.node);
+			}
+		}
+	}
 
 	renderMenu() {
-		const {
-			bodyWrapperComponent: BodyWrapperComponent,
-			prefixCls,
-			bodyStyle = {},
-			renderMenu,
-		} = this.props;
-
-		const Menus = this.renderList();
+		const { bodyWrapperComponent: BodyWrapperComponent, prefixCls, bodyStyle } = this.props;
 
 		return (
-			<BodyWrapperComponent
-				// ref={this.saveListViewBody}
-				// onMouseLeave={this.handleMouseLeave}
-				className={`${prefixCls}-body`}
-				style={bodyStyle}
-			>
-				{renderMenu ? renderMenu(Menus, this.props) : Menus}
+			<BodyWrapperComponent className={`${prefixCls}-body`} style={bodyStyle}>
+				{this.renderList()}
 			</BodyWrapperComponent>
 		);
 	}
@@ -651,30 +445,20 @@ export class ListBox extends React.Component<ListBoxProps, ListBoxState> {
 		const {
 			className,
 			prefixCls,
-			width,
-			height,
+
 			tabIndex,
 			disabled,
-			enableDownUpSelect,
-			onKeyDown,
 			onFocus,
 			onBlur,
-			style = {},
+			style,
 			wrapperComponent: WrapperComponent,
 			headerWrapperComponent: HeaderWrapperComponent,
 			footerWrapperComponent: FooterWrapperComponent,
 			renderHeader,
 			renderFooter,
-			headerStyle = {},
-			footerStyle = {},
+			headerStyle,
+			footerStyle,
 		} = this.props;
-
-		if (width) {
-			style.width = width;
-		}
-		if (height) {
-			style.height = height;
-		}
 
 		const classes = classNames({
 			[`${prefixCls}`]: true,
@@ -684,31 +468,22 @@ export class ListBox extends React.Component<ListBoxProps, ListBoxState> {
 
 		return (
 			<WrapperComponent
-				// ref={this.saveListView}
 				tabIndex={tabIndex}
 				className={classes}
 				style={style}
-				onKeyDown={enableDownUpSelect ? this.onKeyDown : this.onKeyDown}
+				onKeyDown={this.onKeyDown}
 				onFocus={onFocus}
 				onBlur={onBlur}
 			>
 				{renderHeader ? (
-					<HeaderWrapperComponent
-						// ref={this.saveListViewHeader}
-						className={`${prefixCls}-header`}
-						style={headerStyle}
-					>
-						{renderHeader(this.props)}
+					<HeaderWrapperComponent className={`${prefixCls}-header`} style={headerStyle}>
+						{renderHeader()}
 					</HeaderWrapperComponent>
 				) : null}
 				{this.renderMenu()}
 				{renderFooter ? (
-					<FooterWrapperComponent
-						// ref={this.saveListViewFooter}
-						className={`${prefixCls}-footer`}
-						style={footerStyle}
-					>
-						{renderFooter(this.props)}
+					<FooterWrapperComponent className={`${prefixCls}-footer`} style={footerStyle}>
+						{renderFooter()}
 					</FooterWrapperComponent>
 				) : null}
 			</WrapperComponent>

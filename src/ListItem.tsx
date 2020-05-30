@@ -2,13 +2,10 @@ import React from "react";
 import classNames from "classnames";
 import shallowEqual from "shallowequal";
 
-import { Item } from "./types";
+import { Item, ItemData } from "./types";
 
 export interface ListItemProps {
 	prefixCls: string;
-	// onSelect: string;
-	// onDeselect: string;
-	// shallowequal only
 	data: {};
 	value: any;
 	onClick: any;
@@ -17,65 +14,19 @@ export interface ListItemProps {
 	selected: boolean;
 	disabled: boolean;
 	active: boolean;
+	getItemProps: (data: ItemData) => React.HTMLAttributes<HTMLElement>;
 }
 
 export interface ListItemState {}
 
 export class ListItem extends React.PureComponent<ListItemProps> {
-	// static propTypes = {
-	//     prefixCls: PropTypes.string,
-	//     onSelect: PropTypes.func,
-	//     onDeselect: PropTypes.func,
-	//     onClick: PropTypes.func,
-	//     onMouseEnter: PropTypes.func,
-	//     onMouseLeave: PropTypes.func,
-	//     selected: PropTypes.bool,
-	//     disabled: PropTypes.bool,
-	//     item: PropTypes.object,
-	// }
-
 	static defaultProps = {
-		prefixCls: "rw-listbox-item",
-		selected: false,
-		disabled: false,
 		data: {},
 	};
 
 	node: HTMLElement;
 
-	// shouldComponentUpdate(nextProps, nextState) {
-	// 	return !shallowEqual(this.props, nextProps) || !shallowEqual(this.state, nextState);
-	// }
-
-	handleItemClick = (e) => {
-		const { onClick, selected, active, value } = this.props;
-
-		// const itemDOM = this.getItemDOM();
-
-		if (onClick) {
-			onClick(value, e);
-		}
-
-		// if (!selected) {
-		// 	onSelect && onSelect(item, itemDOM);
-		// } else {
-		// 	onDeselect && onDeselect(item, itemDOM);
-		// }
-	};
-
-	handleMouseEnter = (e: React.MouseEvent) => {
-		const { onMouseEnter, value } = this.props;
-
-		onMouseEnter(value, e);
-	};
-
-	handleMouseLeave = (e: React.MouseEvent) => {
-		const { onMouseLeave, value } = this.props;
-
-		onMouseLeave(value, e);
-	};
-
-	saveNode = (dom: React.ReactInstance) => {
+	saveNode = (dom: React.ReactInstance | null) => {
 		this.node = dom as HTMLElement;
 	};
 
@@ -84,21 +35,47 @@ export class ListItem extends React.PureComponent<ListItemProps> {
 	}
 
 	render() {
-		const { prefixCls, selected, children, active, disabled } = this.props;
+		const {
+			prefixCls,
+			selected,
+			children,
+			active,
+			disabled,
+			getItemProps,
+			onMouseEnter,
+			onMouseLeave,
+			data,
+			value,
+			onClick,
+		} = this.props;
+
+		const customProps = getItemProps(data);
+
 		const classes = classNames({
 			[`${prefixCls}`]: true,
 			[`${prefixCls}-active`]: active,
 			[`${prefixCls}-selected`]: selected,
 			[`${prefixCls}-disabled`]: disabled,
+			[customProps.className!]: customProps.className,
 		});
 
 		return (
 			<div
 				ref={this.saveNode}
+				{...customProps}
 				className={classes}
-				onClick={this.handleItemClick}
-				onMouseEnter={this.handleMouseEnter}
-				onMouseLeave={this.handleMouseLeave}
+				onClick={(e) => {
+					onClick(value, e);
+					customProps.onClick?.(e);
+				}}
+				onMouseEnter={(e) => {
+					onMouseEnter(value, e);
+					customProps.onMouseEnter?.(e);
+				}}
+				onMouseLeave={(e) => {
+					onMouseLeave(value, e);
+					customProps.onMouseLeave?.(e);
+				}}
 			>
 				{children}
 			</div>
