@@ -8,17 +8,20 @@ export interface ListItemProps {
 	prefixCls: string;
 	// onSelect: string;
 	// onDeselect: string;
+	// shallowequal only
+	data: {};
+	value: any;
 	onClick: any;
 	onMouseEnter: any;
 	onMouseLeave: any;
 	selected: boolean;
+	disabled: boolean;
 	active: boolean;
-	item: Item;
 }
 
 export interface ListItemState {}
 
-export default class ListItem extends React.Component<ListItemProps> {
+export class ListItem extends React.PureComponent<ListItemProps> {
 	// static propTypes = {
 	//     prefixCls: PropTypes.string,
 	//     onSelect: PropTypes.func,
@@ -35,19 +38,22 @@ export default class ListItem extends React.Component<ListItemProps> {
 		prefixCls: "rw-listbox-item",
 		selected: false,
 		disabled: false,
+		data: {},
 	};
 
-	shouldComponentUpdate(nextProps, nextState) {
-		return !shallowEqual(this.props, nextProps) || !shallowEqual(this.state, nextState);
-	}
+	node: HTMLElement;
+
+	// shouldComponentUpdate(nextProps, nextState) {
+	// 	return !shallowEqual(this.props, nextProps) || !shallowEqual(this.state, nextState);
+	// }
 
 	handleItemClick = (e) => {
-		const { onClick, selected, item, active } = this.props;
+		const { onClick, selected, active, value } = this.props;
+
 		// const itemDOM = this.getItemDOM();
-		if (item.disabled) return;
 
 		if (onClick) {
-			onClick(item, e);
+			onClick(value, e);
 		}
 
 		// if (!selected) {
@@ -56,41 +62,48 @@ export default class ListItem extends React.Component<ListItemProps> {
 		// 	onDeselect && onDeselect(item, itemDOM);
 		// }
 	};
-	// saveItem = (dom) => {
-	// 	this.node = dom;
-	// };
 
-	// getItemDOM() {
-	// 	return this.node;
-	// }
+	handleMouseEnter = (e: React.MouseEvent) => {
+		const { onMouseEnter, value } = this.props;
+
+		onMouseEnter(value, e);
+	};
+
+	handleMouseLeave = (e: React.MouseEvent) => {
+		const { onMouseLeave, value } = this.props;
+
+		onMouseLeave(value, e);
+	};
+
+	saveNode = (dom: React.ReactInstance) => {
+		this.node = dom as HTMLElement;
+	};
+
+	componentDidUpdate() {
+		console.log("update...");
+	}
 
 	render() {
-		const {
-			prefixCls,
-			item,
-			selected,
-			children,
-			active,
-			onMouseEnter,
-			onMouseLeave,
-		} = this.props;
+		const { prefixCls, selected, children, active, disabled } = this.props;
 		const classes = classNames({
 			[`${prefixCls}`]: true,
 			[`${prefixCls}-active`]: active,
 			[`${prefixCls}-selected`]: selected,
-			[`${prefixCls}-disabled`]: item.disabled,
+			[`${prefixCls}-disabled`]: disabled,
 		});
 
 		return (
 			<div
-				// ref={this.saveItem}
+				ref={this.saveNode}
 				className={classes}
 				onClick={this.handleItemClick}
-				onMouseEnter={onMouseEnter}
-				onMouseLeave={onMouseLeave}
+				onMouseEnter={this.handleMouseEnter}
+				onMouseLeave={this.handleMouseLeave}
 			>
 				{children}
 			</div>
 		);
 	}
 }
+
+export default ListItem;

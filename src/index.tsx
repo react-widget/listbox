@@ -21,6 +21,7 @@ export type Item = {
 	disabled: boolean;
 	children?: Item[];
 	data: ItemData;
+	ref: React.RefObject<ListItem>;
 };
 
 export interface ListBoxProps {
@@ -48,12 +49,14 @@ export interface ListBoxProps {
 	emptyLabel?: any;
 	enableDownUpSelect?: boolean;
 	fixListBodyHeightOnIE?: boolean;
+	onSelect?: (value: any | any[], data: {}[] | {}) => void;
 	onItemClick?: any;
 	onItemGroupClick?: any;
-	onChange?: any;
+	onChange?: (value: any | any[], data: {}[] | {}) => void;
 	onFocus?: any;
 	onBlur?: any;
 	onKeyDown?: any;
+	onMouseLeave?: any;
 	renderMenu?: any;
 	renderMenuGroupTitle?: any;
 	renderMenuItem?: any;
@@ -66,10 +69,11 @@ export interface ListBoxProps {
 }
 export interface ListBoxState {
 	items: Item[];
+	itemList: Item[];
 	itemsMap: Record<any, Item>;
 	value: any[];
 	prevProps?: ListBoxProps;
-	activeItemValue?: any;
+	activeItem?: Item | null;
 }
 
 function isIE() {
@@ -85,23 +89,26 @@ function noop() {}
 function dataProcessor(props: ListBoxProps) {
 	const { data, valueField, childrenField, labelField, disabledField } = props;
 	const items: Item[] = [];
+	const itemList: Item[] = [];
 	const itemsMap: Record<any, Item> = {};
 
 	function walk(dataset: {}[], pChildren: Item[]) {
 		dataset.forEach((data) => {
-			const Item: Item = {
+			const item: Item = {
 				value: data[valueField!],
 				label: data[labelField!],
 				disabled: data[disabledField!],
 				data,
+				ref: React.createRef(),
 			};
 
-			pChildren.push(Item);
+			itemList.push(item);
+			pChildren.push(item);
 
-			itemsMap[data[valueField!]] = Item;
+			itemsMap[data[valueField!]] = item;
 
 			if (data[childrenField] && Array.isArray(data[childrenField])) {
-				walk(data[childrenField], (Item.children = []));
+				walk(data[childrenField], (item.children = []));
 			}
 		});
 	}
@@ -110,6 +117,7 @@ function dataProcessor(props: ListBoxProps) {
 
 	return {
 		items,
+		itemList,
 		itemsMap,
 	};
 }
@@ -175,8 +183,8 @@ export class ListBox extends React.Component<ListBoxProps, ListBoxState> {
 
 		this.state = {
 			items: [],
+			itemList: [],
 			itemsMap: {},
-			activeItemValue: DEFAULT_ACTIVE_VALUE,
 			value:
 				props.defaultValue === undefined
 					? []
@@ -212,6 +220,12 @@ export class ListBox extends React.Component<ListBoxProps, ListBoxState> {
 		(findDOMNode(this) as HTMLElement).blur();
 	}
 
+	getItemByValue(value: any): Item | null {
+		return this.state.itemsMap[value] || null;
+	}
+
+	fireChange(value: any) {}
+
 	// onItemClick = (item, e) => {
 	// 	const { onItemClick } = this.props;
 	// 	if (e) {
@@ -241,25 +255,25 @@ export class ListBox extends React.Component<ListBoxProps, ListBoxState> {
 	// 	return value;
 	// }
 
-	// setValue(value) {
-	// 	const { multiple, onChange } = this.props;
-	// 	const { selectedValue } = this.state;
+	setValue(value) {
+		const { multiple, onChange } = this.props;
+		// const { selectedValue } = this.state;
 
-	// 	if (!multiple) {
-	// 		selectedValue.length = 0;
-	// 	}
+		// if (!multiple) {
+		// 	selectedValue.length = 0;
+		// }
 
-	// 	selectedValue.push(value);
-	// 	if (!("value" in this.props)) {
-	// 		this.setState({
-	// 			selectedValue,
-	// 		});
-	// 	}
+		// selectedValue.push(value);
+		// if (!("value" in this.props)) {
+		// 	this.setState({
+		// 		selectedValue,
+		// 	});
+		// }
 
-	// 	if (onChange) {
-	// 		onChange(this.transformChangeValue(multiple ? copy(selectedValue) : selectedValue[0]));
-	// 	}
-	// }
+		// if (onChange) {
+		// 	onChange(this.transformChangeValue(multiple ? copy(selectedValue) : selectedValue[0]));
+		// }
+	}
 
 	// getVaule() {
 	// 	const { multiple } = this.props;
@@ -292,109 +306,130 @@ export class ListBox extends React.Component<ListBoxProps, ListBoxState> {
 	// 	}
 	// };
 
-	scrollActiveItemIntoView() {}
+	scrollActiveItemIntoView() {
+		const { activeItem } = this.state;
 
-	protected getActiveIndex(items: Item[]) {}
+		if (activeItem && activeItem.ref.current) {
+			scrollIntoView(activeItem.ref.current.node);
+		}
+	}
 
-	protected getNextActiveItem() {}
+	protected getActiveIndex() {
+		const items = this.state.itemList.filter((item) => !item.children);
+		let currentActive =
+			this.state.activeItem || this.getItemByValue(this.state.value[0]) || items[0];
+
+		if (!currentActive) return -1;
+
+		for (let i = 0; i < items.length; i++) {
+			if (currentActive.value === items[i].value) {
+				return i;
+			}
+		}
+
+		return -1;
+	}
+
+	protected getNextActiveItem(code: React.KeyboardEvent<Element>["keyCode"]) {
+		const items = this.state.itemList.filter((item) => !item.children);
+		let activeItem: Item | null = null;
+		if (!items.length) return activeItem;
+
+		let activeIndex = this.getActiveIndex();
+
+		while (--items.length) {
+			if (code === KEY_DOWN) {
+				activeIndex++;
+			} else if (code === KEY_UP) {
+				activeIndex--;
+				if (activeIndex < 0) {
+					activeIndex = items.length - 1;
+				}
+			}
+
+			activeIndex = activeIndex % items.length;
+
+			activeItem = items[activeIndex];
+
+			if (activeItem && activeItem.disabled) continue;
+
+			break;
+		}
+
+		return activeItem;
+	}
 
 	onKeyDown = (e: React.KeyboardEvent) => {
-		const { prefixCls } = this.props;
-		const selector = `.${prefixCls}-item:not(.${prefixCls}-item-disabled)`;
-		const activeCls = `${prefixCls}-item-active`;
-		const selectCls = `${prefixCls}-item-selected`;
+		const { activeItem } = this.state;
 		const keyCode = e.keyCode;
-		let list = null; //NodeList[]
 
 		if (keyCode === KEY_DOWN || keyCode === KEY_UP) {
 			e.preventDefault();
+			this.setState(
+				{
+					activeItem: this.getNextActiveItem(keyCode),
+				},
+				() => {
+					this.scrollActiveItemIntoView();
+				}
+			);
+		} else if (activeItem && keyCode === KEY_ENTER) {
+			this.fireChange(activeItem.value);
+		}
+	};
+
+	handleMouseLeave = (e: React.MouseEvent) => {
+		const { onMouseLeave } = this.props;
+
+		this.setState({
+			activeItem: null,
+		});
+
+		onMouseLeave?.(e);
+	};
+
+	handleItemMouseEnter = (cValue: any) => {
+		this.setState({
+			activeItem: this.getItemByValue(cValue),
+		});
+	};
+
+	handleItemMouseLeave = (cValue: any) => {
+		this.setState({
+			activeItem: null,
+		});
+	};
+
+	handleItemClick = (cValue: any, e: React.MouseEvent<HTMLElement>) => {
+		const { multiple, onChange, onSelect } = this.props;
+		const { value } = this.state;
+		const item = this.getItemByValue(cValue);
+
+		if (!item) return;
+
+		scrollIntoView(e.currentTarget);
+
+		if (item.disabled) return;
+
+		if (this.props.value === undefined) {
+			this.setState({
+				value: [item.value],
+			});
 		}
 
-		console.log(e.keyCode);
+		onChange?.(value, item.data);
 
-		// function getActiveIndex(keyCode) {
-		// 	let idx = -1;
-		// 	const UP = keyCode === 38;
-		// 	const DOWN = keyCode === 40;
-		// 	let sIdx = -1;
+		onSelect?.(value, item.data);
 
-		// 	if (list) {
-		// 		//ie no support NodeList.prototype.forEach
-		// 		each(list, (item, i) => {
-		// 			if (hasClass(item, activeCls)) {
-		// 				removeClass(item, activeCls);
-		// 				if (UP) {
-		// 					if (idx === -1) idx = i;
-		// 				} else {
-		// 					idx = i;
-		// 				}
-		// 			} else if (idx === -1 && hasClass(item, selectCls)) {
-		// 				sIdx = i;
-		// 			}
-		// 		});
-		// 	}
+		// const newValues = [];
 
-		// 	return idx === -1 ? sIdx : idx;
-		// }
-
-		// const props = this.props;
-		// const state = this.state;
-		// const dom = findDOMNode(this);
-		// const UP = e.keyCode === 38;
-		// const DOWN = e.keyCode === 40;
-		// const ENTER = e.keyCode === 13;
-		// const indexValueMap = this._indexValueMap;
-		// const activeIndex = this._activeIndex;
-
-		// if (props.enableDownUpSelect) {
-		// 	props.onKeyDown(e);
-		// }
-
-		// if (!list) {
-		// 	list = dom.querySelectorAll(selector);
-		// }
-
-		// if (!list.length) return;
-
-		// const minIndex = 0;
-		// const maxIndex = list.length - 1;
-
-		// if (UP || DOWN) {
-		// 	e.preventDefault();
-		// 	let idx = getActiveIndex(e.keyCode);
-
-		// 	if (UP) {
-		// 		idx = idx === -1 ? maxIndex : --idx;
-		// 		if (idx < 0) idx = maxIndex;
-		// 		addClass(list[idx], activeCls);
-		// 	} else {
-		// 		idx = idx === -1 ? minIndex : ++idx;
-		// 		if (idx > maxIndex) idx = 0;
-		// 		addClass(list[idx], activeCls);
-		// 	}
-
-		// 	this._activeIndex = list[idx].getAttribute("data-index");
-		// 	scrollIntoView(list[idx], this.getListViewBody());
-		// } else if (ENTER && activeIndex !== null) {
-		// 	const value = indexValueMap[activeIndex];
-		// 	const item = state.itemsMap[value];
-		// 	this.setValue(value);
-		// 	//触发onItemClick
-		// 	this.onItemClick(item);
+		// if (multiple) {
+		// } else {
+		// 	this.setState({
+		// 		value: item.value,
+		// 	});
 		// }
 	};
-
-	handleItemMouseEnter = (e: React.MouseEvent) => {
-		const { prefixCls } = this.props;
-		addClass(e.currentTarget, `${prefixCls}-item-active`);
-	};
-
-	handleItemMouseLeave = (e: React.MouseEvent) => {
-		const { prefixCls } = this.props;
-		removeClass(e.currentTarget, `${prefixCls}-item-active`);
-	};
-
-	handleItemClick = (e: React.MouseEvent) => {};
 
 	handleGroupClick = (e: React.MouseEvent) => {};
 
@@ -421,7 +456,7 @@ export class ListBox extends React.Component<ListBoxProps, ListBoxState> {
 			renderMenuItem,
 			renderMenuGroupTitle,
 		} = this.props;
-		const { activeItemValue } = this.state;
+		const { activeItem, value } = this.state;
 
 		return items.map((item) => {
 			const isGroup = item.children;
@@ -439,10 +474,14 @@ export class ListBox extends React.Component<ListBoxProps, ListBoxState> {
 				</ListItemGroup>
 			) : (
 				<ListItem
+					key={item.value}
+					ref={item.ref}
 					prefixCls={itemPrefixCls}
-					item={item}
-					selected={false}
-					active={activeItemValue === item.value}
+					data={item.data}
+					value={item.value}
+					disabled={item.disabled}
+					selected={value.indexOf(item.value) !== -1}
+					active={activeItem?.value === item.value}
 					onClick={this.handleItemClick}
 					onMouseEnter={this.handleItemMouseEnter}
 					onMouseLeave={this.handleItemMouseLeave}
@@ -599,6 +638,7 @@ export class ListBox extends React.Component<ListBoxProps, ListBoxState> {
 		return (
 			<BodyWrapperComponent
 				// ref={this.saveListViewBody}
+				// onMouseLeave={this.handleMouseLeave}
 				className={`${prefixCls}-body`}
 				style={bodyStyle}
 			>
@@ -648,7 +688,7 @@ export class ListBox extends React.Component<ListBoxProps, ListBoxState> {
 				tabIndex={tabIndex}
 				className={classes}
 				style={style}
-				onKeyDown={enableDownUpSelect ? this.onKeyDown : onKeyDown}
+				onKeyDown={enableDownUpSelect ? this.onKeyDown : this.onKeyDown}
 				onFocus={onFocus}
 				onBlur={onBlur}
 			>
