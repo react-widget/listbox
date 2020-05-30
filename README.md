@@ -1,79 +1,211 @@
-# react-widget-listbox
+# ListBox
+
+ListBox组件
 
 ## 安装
+
 `npm install --save react-widget-listbox`
 
-## API
 
-```html
-<ListBox 
-items={[{label:lucy, value: lucy}]}
->
-</ListBox>
+## 使用
+
+[![Edit react-widget-listbox](https://codesandbox.io/static/img/play-codesandbox.svg)](https://codesandbox.io/s/nice-moser-kqj7y?fontsize=14&hidenavigation=1&theme=dark)
+
+```js
+import React from "react";
+import Trigger from "react-widget-listbox";
+import "react-widget-listbox/style";
+
+export default function App() {
+  return (
+    <div
+      className="App"
+      style={{
+        padding: 100
+      }}
+    >
+      <ListBox
+        data={[
+            {
+                value: 'Banana',
+                label: 'Banana'
+            }, {
+                value: 'Orange',
+                label: 'Orange'
+            }, {
+                value: 'Apple',
+                label: 'Apple'
+            }, {
+                value: 'Mango',
+                label: 'Mango'
+            }, 
+        ]}  
+      />
+    </div>
+  );
+}
+
+
 ```
 
-### ListBox props
 
-| 参数 | 说明 | 类型 | 默认值 |
-| --- | --- | --- | --- |
-| prefixCls | 组件CSS样式前缀 | string | rw-listbox |
-| className | 组件className属性 | string | - |
-| style | 组件style属性 | React.CSSProperties | - |
-| width | css快捷属性 | number | - |
-| height | css快捷属性 | number | - |
-| tabIndex | 组件tabIndex属性 | number | - |
-| multiple | 多选模式, 多选模式下value是数组 | boolean | false |
-| defaultValue | 指定默认选中的条目 | string\|number\|Array\<string\|number> | - |
-| value | 指定默认选中的条目 `受控` | string\|number\|Array\<string\|number> | - |
-| autoFocus | 默认获取焦点 | boolean | false |
-| disabled | 是否禁用 | boolean | false |
-| valueField | 设置取值字段 | string | value |
-| labelField | 设置显示字段 | string | label |
-| childrenField | 设置子节点字段 | string | children |
-| headerStyle | 设置header的样式，renderHeader启用时有效 | React.CSSProperties | - |
-| footerStyle | 设置footer的样式，renderFooter启用时有效 | React.CSSProperties | - |
-| bodyStyle | 设置body的样式 | React.CSSProperties | - |
-| items | 组件数据 | Array\<ItemData\|ItemGroupData> | [] |
-| itemsMap | 组件数据Hash表 | Object\<string, ItemData> | [] |
-| emptyLabel | 无内容时显示 | ReactNode | Not Found. |
-| labelInValue | 开启后`onChange(ItemData \| Array\<ItemData>)` | boolean | false |
-| enableDownUpSelect | 开启可通过上下方向键选择项目 | boolean | true |
-| fixListBodyHeightOnIE | IE下会自动设置body的maxHeight，如果CSS中已经确定可以关闭 | boolean | true |
-| onItemClick | 列表项点击时触发，注：如果开启`enableDownUpSelect`并回车时也会触发 | function(item: ItemData, e: Event) => ReactNode | - |
-| onItemGroupClick | 列表分组項点击时触发 | function(item: ItemGroupData, e: Event) | - |
-| onChange | 数据改变时触发 | function(item: number\|string\|ItemData \| Array\<ItemData\|string\|number>) | - |
-| onBlur | 失去焦点的时回调 | function | - |
-| onFocus | 获得焦点时回调 | function | - |
-| onKeyDown | 键盘按下时触发 | function | - |
-| renderMenu | 自定义列表框内容 | (menus: Array\<ReactNode>, props) => ReactNode | - |
-| renderMenuItem | 自定义列表项内容 | (label:React.Node, item:ItemData) => ReactNode | - |
-| renderMenuGroupTitle | 自定义列表项分组标题内容 | (label:React.Node, item:ItemGroupData) => ReactNode | - |
-| renderHeader | 渲染列表项头部 | function(props): ReactNode | null |
-| renderFooter | 渲染列表项尾部 | function(props): ReactNode | null |
-| wrapperComponent | ListBox最外层容器组件 | ReactNode | div |
-| headerWrapperComponent | ListBox头部容器组件 | ReactNode | div |
-| bodyWrapperComponent | ListBox列表项容器组件 | ReactNode | div |
-| footerWrapperComponent | ListBox尾部容器组件 | ReactNode | div |
+### Interfaces
 
+```ts
+export declare type ItemData = Record<string | number, any>;
+export declare type ValueType = number | string;
+export declare type Item = {
+    value: any;
+    label: React.ReactNode;
+    disabled: boolean;
+    children?: Item[];
+    data: ItemData;
+    ref: React.RefObject<ListItem>;
+};
+export interface ListBoxProps {
+    /** 样式前缀 */
+    prefixCls?: string;
+    /** 样式名 */
+    className?: string;
+    /** 样式属性 */
+    style?: React.CSSProperties;
+    /** tabIndex值 */
+    tabIndex?: number;
+    /** 支持多选，开启多选后，defaultValue/value为数组 */
+    multiple?: boolean;
+    /** 默认选中值 */
+    defaultValue?: ValueType | ValueType[];
+    /** 选中值(受控) */
+    value?: ValueType | ValueType[];
+    /** 禁用 */
+    disabled?: boolean;
+    /** 只读 */
+    readOnly?: boolean;
+    /** 自动获取焦点 */
+    autoFocus?: boolean;
+    /** 数据集 */
+    data?: ItemData[];
+    /** 设置data数据的值字段 */
+    valueField?: string;
+    /** 设置data数据的显示字段 */
+    labelField?: string;
+    /** 设置data数据的禁用字段 */
+    disabledField?: string;
+    /** 设置data数据的子节点字段 */
+    childrenField?: string;
+    /** 设置renderHeader后CSS属性 */
+    headerStyle?: React.CSSProperties;
+    /** 设置renderFooter后CSS属性 */
+    footerStyle?: React.CSSProperties;
+    /** 设置列表容器CSS属性 */
+    bodyStyle?: React.CSSProperties;
+    /** 无数据时显示内容 */
+    emptyLabel?: React.ReactNode;
+    /** 获取列表项属性 */
+    getItemProps?: (data: ItemData) => React.HTMLAttributes<HTMLElement>;
+    /** 获取分组标题项属性 */
+    getGroupTitleProps?: (data: ItemData) => React.HTMLAttributes<HTMLElement>;
+    /** 自定义渲染分组标题 */
+    renderGroupTitle?: (data: ItemData) => React.ReactNode;
+    /** 自定义渲染列表项内容 */
+    renderItem?: (data: ItemData, item: Item) => React.ReactNode;
+    /** 自定义渲染器 */
+    renderer?: (listBody: React.ReactNode) => React.ReactNode;
+    fixListBodyHeightOnIE?: boolean;
+    onSelect?: (value: string | number, data: ItemData) => void;
+    onDeselect?: (value: ValueType, data: ItemData) => void;
+    onChange?: (value: ValueType | ValueType[], data: ItemData[] | ItemData) => void;
+    onFocus?: (e: React.FocusEvent) => void;
+    onBlur?: (e: React.FocusEvent) => void;
+    onKeyDown?: (e: React.KeyboardEvent) => void;
+    onMouseLeave?: (e: React.MouseEvent) => void;
+    wrapperComponent: React.ElementType;
+    bodyWrapperComponent: React.ElementType;
+}
+```
 
-### ListBox Methods
+### defaultProps
+```js
+{
+	prefixCls: "rw-listbox",
+	valueField: "value",
+	labelField: "label",
+	disabledField: "disabled",
+	childrenField: "children",
+	tabIndex: 0,
+	emptyLabel: "Not Found",
+	fixListBodyHeightOnIE: true,
+	data: [],
+	wrapperComponent: "div",
+	bodyWrapperComponent: "div",
+}
+```
 
-| 名称 | 说明 |
-| --- | --- |
-| blur() | 取消焦点 |
-| focus() | 获取焦点 |
+### 基础样式
 
-### ItemData props
+```css
+.rw-listbox {
+	border-radius: 3px;
+	position: relative;
+	background: #fff;
+	display: flex;
+	flex-direction: column;
+	border: 1px solid #10161a26;
+	padding: 5px;
+}
 
-| 参数 | 说明 | 类型 | 默认值 |
-| --- | --- | --- | --- |
-| disabled | 是否禁用 | boolean | false |
-| label | 列表项的title | ReactNode | - |
-| value | 列表项值 | any | - |
+.rw-listbox-body {
+	flex: 1;
+	overflow: auto;
+	overflow-x: hidden;
+}
 
-### ItemGroupData props
+.rw-listbox-item-group .rw-listbox-item {
+	padding-left: 23px;
+}
 
-| 参数 | 说明 | 类型 | 默认值 |
-| --- | --- | --- | --- |
-| children | 子节点 | Array\<ItemData> | - |
-| label | 组名 | string\|React.Element | 无 |
+.rw-listbox-group-title {
+	display: flex;
+	padding: 5px 7px;
+	line-height: 20px;
+	user-select: none;
+	color: rgb(24, 32, 38);
+}
+
+.rw-listbox-item {
+	display: flex;
+	border-radius: 2px;
+	padding: 5px 7px;
+	line-height: 20px;
+	cursor: pointer;
+	user-select: none;
+	color: rgb(24, 32, 38);
+}
+
+.rw-listbox-item-active {
+	background-color: rgba(167, 182, 194, 0.3);
+}
+
+.rw-listbox-item:active {
+	background-color: rgba(115, 134, 148, 0.3);
+}
+
+.rw-listbox-item.rw-listbox-item-selected {
+	color: #fff;
+	background-color: #137cbd;
+}
+.rw-listbox-disabled .rw-listbox-item,
+.rw-listbox-item.rw-listbox-item-disabled {
+	background-color: inherit;
+	color: rgba(167, 182, 194, 0.6);
+	cursor: default;
+}
+
+.rw-listbox-group-title {
+	font-weight: 400;
+}
+.rw-listbox-group-list .rw-listbox-item {
+	padding-left: 24px;
+}
+
+```

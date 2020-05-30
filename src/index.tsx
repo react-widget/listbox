@@ -5,6 +5,8 @@ import ListItem from "./ListItem";
 import ListItemGroup from "./ListItemGroup";
 import scrollIntoView from "dom-helpers/scrollTo";
 
+export const version = "%VERSION%";
+
 const KEY_UP = 38;
 const KEY_DOWN = 40;
 const KEY_ENTER = 13;
@@ -22,26 +24,54 @@ export type Item = {
 };
 
 export interface ListBoxProps {
+	/** 样式前缀 */
 	prefixCls?: string;
+	/** 样式名 */
 	className?: string;
+	/** 样式属性 */
 	style?: React.CSSProperties;
+	/** tabIndex值 */
 	tabIndex?: number;
+	/** 支持多选，开启多选后，defaultValue/value为数组 */
 	multiple?: boolean;
+	/** 默认选中值 */
 	defaultValue?: ValueType | ValueType[];
+	/** 选中值(受控) */
 	value?: ValueType | ValueType[];
+	/** 禁用 */
 	disabled?: boolean;
+	/** 只读 */
+	readOnly?: boolean;
+	/** 自动获取焦点 */
 	autoFocus?: boolean;
-	valueField?: string;
-	labelField?: string;
-	disabledField?: string;
-	childrenField?: string;
-	headerStyle?: React.CSSProperties;
-	footerStyle?: React.CSSProperties;
-	bodyStyle?: React.CSSProperties;
+	/** 数据集 */
 	data?: ItemData[];
+	/** 设置data数据的值字段 */
+	valueField?: string;
+	/** 设置data数据的显示字段 */
+	labelField?: string;
+	/** 设置data数据的禁用字段 */
+	disabledField?: string;
+	/** 设置data数据的子节点字段 */
+	childrenField?: string;
+	/** 设置renderHeader后CSS属性 */
+	headerStyle?: React.CSSProperties;
+	/** 设置renderFooter后CSS属性 */
+	footerStyle?: React.CSSProperties;
+	/** 设置列表容器CSS属性 */
+	bodyStyle?: React.CSSProperties;
+	/** 无数据时显示内容 */
 	emptyLabel?: React.ReactNode;
+	/** 获取列表项属性 */
 	getItemProps?: (data: ItemData) => React.HTMLAttributes<HTMLElement>;
+	/** 获取分组标题项属性 */
 	getGroupTitleProps?: (data: ItemData) => React.HTMLAttributes<HTMLElement>;
+	/** 自定义渲染分组标题 */
+	renderGroupTitle?: (data: ItemData) => React.ReactNode;
+	/** 自定义渲染列表项内容 */
+	renderItem?: (data: ItemData, item: Item) => React.ReactNode;
+	/** 自定义渲染器 */
+	renderer?: (listBody: React.ReactNode) => React.ReactNode;
 	// Invalid
 	fixListBodyHeightOnIE?: boolean;
 	onSelect?: (value: string | number, data: ItemData) => void;
@@ -51,15 +81,8 @@ export interface ListBoxProps {
 	onBlur?: (e: React.FocusEvent) => void;
 	onKeyDown?: (e: React.KeyboardEvent) => void;
 	onMouseLeave?: (e: React.MouseEvent) => void;
-	renderGroupTitle?: (data: ItemData) => React.ReactNode;
-	renderItem?: (data: ItemData, item: Item) => React.ReactNode;
-	// TODO:
-	renderHeader?: () => React.ReactNode;
-	renderFooter?: () => React.ReactNode;
 	wrapperComponent: React.ElementType;
-	headerWrapperComponent: React.ElementType;
 	bodyWrapperComponent: React.ElementType;
-	footerWrapperComponent: React.ElementType;
 }
 export interface ListBoxState {
 	items: Item[];
@@ -126,9 +149,7 @@ export class ListBox extends React.Component<ListBoxProps, ListBoxState> {
 		fixListBodyHeightOnIE: true,
 		data: [],
 		wrapperComponent: "div",
-		headerWrapperComponent: "div",
 		bodyWrapperComponent: "div",
-		footerWrapperComponent: "div",
 	};
 
 	static getDerivedStateFromProps(nextProps: ListBoxProps, state: ListBoxState) {
@@ -178,18 +199,18 @@ export class ListBox extends React.Component<ListBoxProps, ListBoxState> {
 		return this.state.itemsMap[value] || null;
 	}
 
-	fireSelect(item: Item) {
+	protected fireSelect(item: Item) {
 		const { onSelect } = this.props;
 		onSelect?.(item.value, item);
 	}
 
-	fireDeselect(item: Item) {
+	protected fireDeselect(item: Item) {
 		const { onDeselect } = this.props;
 		onDeselect?.(item.value, item);
 	}
 
-	setValue(newValue: any[]) {
-		const { multiple, onChange, onSelect } = this.props;
+	protected setValue(newValue: any[]) {
+		const { multiple, onChange } = this.props;
 
 		if (this.props.value === undefined) {
 			this.setState({
@@ -261,9 +282,13 @@ export class ListBox extends React.Component<ListBoxProps, ListBoxState> {
 	}
 
 	toggleSelectItem(item: Item) {
-		const { multiple } = this.props;
+		const { multiple, readOnly, disabled } = this.props;
 		const { value } = this.state;
 		const idx = value.indexOf(item.value);
+
+		if (readOnly || disabled) {
+			return;
+		}
 
 		if (multiple) {
 			if (idx === -1) {
@@ -303,7 +328,7 @@ export class ListBox extends React.Component<ListBoxProps, ListBoxState> {
 		}
 	};
 
-	handleMouseLeave = (e: React.MouseEvent) => {
+	protected handleMouseLeave = (e: React.MouseEvent) => {
 		const { onMouseLeave } = this.props;
 
 		this.setState({
@@ -313,19 +338,19 @@ export class ListBox extends React.Component<ListBoxProps, ListBoxState> {
 		onMouseLeave?.(e);
 	};
 
-	handleItemMouseEnter = (cValue: any) => {
+	protected handleItemMouseEnter = (cValue: any) => {
 		this.setState({
 			activeItem: this.getItemByValue(cValue),
 		});
 	};
 
-	handleItemMouseLeave = (cValue: any) => {
+	protected handleItemMouseLeave = (cValue: any) => {
 		this.setState({
 			activeItem: null,
 		});
 	};
 
-	handleItemClick = (cValue: any, e: React.MouseEvent<HTMLElement>) => {
+	protected handleItemClick = (cValue: any, e: React.MouseEvent<HTMLElement>) => {
 		const item = this.getItemByValue(cValue);
 
 		if (!item) return;
@@ -337,13 +362,13 @@ export class ListBox extends React.Component<ListBoxProps, ListBoxState> {
 		this.toggleSelectItem(item);
 	};
 
-	getItemProps = (data: ItemData): React.HTMLAttributes<HTMLElement> => {
+	protected getItemProps = (data: ItemData): React.HTMLAttributes<HTMLElement> => {
 		const { getItemProps } = this.props;
 
 		return getItemProps ? getItemProps(data) : {};
 	};
 
-	renderListItems(items: Item[]) {
+	protected renderListItems(items: Item[]) {
 		const { prefixCls, renderItem, renderGroupTitle, getGroupTitleProps } = this.props;
 		const { activeItem, value } = this.state;
 
@@ -381,7 +406,7 @@ export class ListBox extends React.Component<ListBoxProps, ListBoxState> {
 		});
 	}
 
-	renderList() {
+	protected renderList() {
 		const { emptyLabel } = this.props;
 		const { items } = this.state;
 
@@ -431,7 +456,7 @@ export class ListBox extends React.Component<ListBoxProps, ListBoxState> {
 		}
 	}
 
-	renderMenu() {
+	protected renderBody() {
 		const { bodyWrapperComponent: BodyWrapperComponent, prefixCls, bodyStyle } = this.props;
 
 		return (
@@ -445,26 +470,24 @@ export class ListBox extends React.Component<ListBoxProps, ListBoxState> {
 		const {
 			className,
 			prefixCls,
-
 			tabIndex,
 			disabled,
+			readOnly,
 			onFocus,
 			onBlur,
 			style,
 			wrapperComponent: WrapperComponent,
-			headerWrapperComponent: HeaderWrapperComponent,
-			footerWrapperComponent: FooterWrapperComponent,
-			renderHeader,
-			renderFooter,
-			headerStyle,
-			footerStyle,
+			renderer,
 		} = this.props;
 
 		const classes = classNames({
 			[`${prefixCls}`]: true,
 			[className!]: className,
 			[`${prefixCls}-disabled`]: disabled,
+			[`${prefixCls}-readonly`]: readOnly,
 		});
+
+		const listBody = this.renderBody();
 
 		return (
 			<WrapperComponent
@@ -475,17 +498,7 @@ export class ListBox extends React.Component<ListBoxProps, ListBoxState> {
 				onFocus={onFocus}
 				onBlur={onBlur}
 			>
-				{renderHeader ? (
-					<HeaderWrapperComponent className={`${prefixCls}-header`} style={headerStyle}>
-						{renderHeader()}
-					</HeaderWrapperComponent>
-				) : null}
-				{this.renderMenu()}
-				{renderFooter ? (
-					<FooterWrapperComponent className={`${prefixCls}-footer`} style={footerStyle}>
-						{renderFooter()}
-					</FooterWrapperComponent>
-				) : null}
+				{renderer ? renderer(listBody) : listBody}
 			</WrapperComponent>
 		);
 	}

@@ -54,9 +54,6 @@ export default class DEMO extends Component {
 					autoFocus
 					renderHeader={() => <h3>header</h3>}
 					renderFooter={() => <h3>footer</h3>}
-					renderMenu={(a) => a}
-					// renderMenuItem={(a) => a + "-opt"}
-					// renderMenuGroupTitle={(a) => a + "-opt"}
 					headerStyle={{
 						borderBottom: "1px solid #ccc",
 					}}
@@ -67,13 +64,12 @@ export default class DEMO extends Component {
 					onChange={this.handleChange}
 					data={dataset.filter((item, i) => item.label.indexOf(this.filterMsg) >= 0)}
 					emptyLabel="无匹配项"
-					onItemGroupClick={(d) => console.log(d)}
 				/>
 
 				<ListBox
 					data={dataset}
 					multiple
-					disabled={false}
+					disabled={true}
 					labelInValue
 					onChange={this.handleChange2}
 					style={{

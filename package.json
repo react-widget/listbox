@@ -1,7 +1,7 @@
 {
 	"name": "react-widget-listbox",
-	"version": "2.0.0-beta",
-	"description": "listbox",
+	"version": "2.0.0",
+	"description": "rw-listbox-listbox",
 	"main": "cjs/index.js",
 	"module": "esm/index.js",
 	"types": "lib/index.d.ts",
@@ -46,8 +46,7 @@
 	"dependencies": {
 		"@babel/runtime": "^7.9.2",
 		"classnames": "^2.2.6",
-		"dom-helpers": "^5.1.4",
-		"shallowequal": "^1.1.0"
+		"dom-helpers": "^5.1.4"
 	},
 	"devDependencies": {
 		"@types/enzyme": "^3.10.5",

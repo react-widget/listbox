@@ -1,8 +1,7 @@
 import React from "react";
 import classNames from "classnames";
-import shallowEqual from "shallowequal";
 
-import { Item, ItemData } from "./types";
+import { ItemData } from "./types";
 
 export interface ListItemProps {
 	prefixCls: string;
@@ -29,10 +28,6 @@ export class ListItem extends React.PureComponent<ListItemProps> {
 	saveNode = (dom: React.ReactInstance | null) => {
 		this.node = dom as HTMLElement;
 	};
-
-	componentDidUpdate() {
-		console.log("update...");
-	}
 
 	render() {
 		const {
