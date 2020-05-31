@@ -1,7 +1,7 @@
 {
 	"name": "react-widget-listbox",
 	"version": "2.0.0",
-	"description": "rw-listbox-listbox",
+	"description": "rw-widget-listbox",
 	"main": "cjs/index.js",
 	"module": "esm/index.js",
 	"types": "lib/index.d.ts",
